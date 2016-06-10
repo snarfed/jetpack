@@ -1,3 +1,4 @@
+/* Do not modify this file directly.  It is concatenated from individual module CSS files. */
 #loginform {
 	/* We set !important because sometimes static is added inline */
 	position: relative !important;
@@ -28,8 +29,8 @@
 	position: absolute;
 		bottom: 20px;
 	padding: 0 24px;
-	margin-left: -24px;
 	margin-right: -24px;
+	margin-left: -24px;
 	width: 100%;
 }
 
@@ -38,8 +39,8 @@
 		bottom: auto;
 	padding: 0;
 	margin-top: 16px;
-	margin-left: 0;
 	margin-right: 0;
+	margin-left: 0;
 }
 
 .jetpack-sso-body #jetpack-sso-wrap {
@@ -47,8 +48,8 @@
 		bottom: auto;
 	padding: 0;
 	margin-top: 0;
-	margin-left: 0;
 	margin-right: 0;
+	margin-left: 0;
 }
 
 #loginform #jetpack-sso-wrap p {
@@ -101,7 +102,7 @@
 	content: '';
 	height: 1px;
 	position: absolute;
-		left: 0;
+		right: 0;
 		top: 50%;
 	width: 100%;
 }
@@ -124,12 +125,12 @@
 
 .jetpack-sso.button > span {
 	position: relative;
-	padding-left: 30px;
+	padding-right: 30px;
 }
 
 .jetpack-sso.button .genericon-wordpress {
 	position: absolute;
-		left: 0;
+		right: 0;
 		top: -3px;
 	font-size: 24px;
 }
