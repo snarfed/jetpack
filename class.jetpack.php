@@ -1660,7 +1660,7 @@ class Jetpack {
 		 *
 		 * @param bool true Should Twitter Card Meta tags be disabled. Default to true.
 		 */
-		if ( apply_filters( 'jetpack_disable_twitter_cards', true ) ) {
+		if ( ! apply_filters( 'jetpack_disable_twitter_cards', false ) ) {
 			require_once JETPACK__PLUGIN_DIR . 'class.jetpack-twitter-cards.php';
 		}
 	}
@@ -2572,8 +2572,6 @@ class Jetpack {
 		$active[] = $module;
 		Jetpack_Options::update_option( 'active_modules', array_unique( $active ) );
 		Jetpack::state( 'error', false ); // the override
-		Jetpack::state( 'message', 'module_activated' );
-		Jetpack::state( 'module', $module );
 		ob_end_clean();
 		Jetpack::catch_errors( false );
 
