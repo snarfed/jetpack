@@ -131,6 +131,7 @@ class Jetpack_Sync_Defaults {
 		'is_multi_site'                   => 'is_multisite',
 		'main_network_site'               => 'network_site_url',
 		'single_user_site'                => array( 'Jetpack', 'is_single_user_site' ),
+		'updates'                         => array( 'Jetpack', 'get_updates' ),
 		'has_file_system_write_access'    => array( 'Jetpack_Sync_Functions', 'file_system_write_access' ),
 		'is_version_controlled'           => array( 'Jetpack_Sync_Functions', 'is_version_controlled' ),
 		'taxonomies'                      => array( 'Jetpack_Sync_Functions', 'get_taxonomies' ),
@@ -140,6 +141,7 @@ class Jetpack_Sync_Defaults {
 		'sso_match_by_email'              => array( 'Jetpack_SSO_Helpers', 'match_by_email' ),
 		'sso_new_user_override'           => array( 'Jetpack_SSO_Helpers', 'new_user_override' ),
 		'sso_bypass_default_login_form'   => array( 'Jetpack_SSO_Helpers', 'bypass_login_forward_wpcom' ),
+		'wp_version'                   => array( 'Jetpack_Sync_Functions', 'wp_version' ),
 	);
 
 	static $blacklisted_post_types = array(
