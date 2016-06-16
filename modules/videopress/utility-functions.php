@@ -244,3 +244,14 @@ function videopress_get_transcoding_status( $post_id ) {
 	return $status;
 }
 
+/**
+ * Get the direct url to the video.
+ *
+ * @param string $guid
+ *
+ * @return string
+ */
+function videopress_get_url( $guid ) {
+	return 'https://videopress.com/v/' . $guid;
+}
+
