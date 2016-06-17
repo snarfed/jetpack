@@ -176,7 +176,6 @@ class Jetpack_Sync_Client {
 			add_action( 'jetpack_full_sync_network_options', $handler );
 		}
 
-
 		// Module Activation
 		add_action( 'jetpack_activate_module', $handler );
 		add_action( 'jetpack_deactivate_module', $handler );
@@ -198,7 +197,6 @@ class Jetpack_Sync_Client {
 		return $args;
 	}
 
-	// TODO: Refactor to use one set whitelist function, with one is_whitelisted.
 	function set_options_whitelist( $options ) {
 		$this->options_whitelist = $options;
 	}
@@ -296,12 +294,7 @@ class Jetpack_Sync_Client {
 	}
 
 	function action_handler() {
-		// TODO: it's really silly to have this function here - it should be
-		// wherever we initialize the action listeners or we're just wasting cycles
-		if ( Jetpack::is_development_mode() || Jetpack::is_staging_site() ) {
-			return false;
-		}
-
+		
 		$current_filter = current_filter();
 		$args           = func_get_args();
 
