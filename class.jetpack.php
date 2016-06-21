@@ -782,6 +782,12 @@ class Jetpack {
 		require_once( JETPACK__PLUGIN_DIR . '_inc/genericons.php' );
 		jetpack_register_genericons();
 
+		/**
+		 * Register the social logos 
+		 */
+		require_once( JETPACK__PLUGIN_DIR . '_inc/social-logos.php' );
+		jetpack_register_social_logos();
+
 		if ( ! wp_style_is( 'jetpack-icons', 'registered' ) )
 			wp_register_style( 'jetpack-icons', plugins_url( 'css/jetpack-icons.min.css', JETPACK__PLUGIN_FILE ), false, JETPACK__VERSION );
 	}
@@ -1066,17 +1072,8 @@ class Jetpack {
 	 * @return string ( '1' | '0' )
 	 **/
 	public static function is_version_controlled() {
-
-		if ( !class_exists( 'WP_Automatic_Updater' ) ) {
-			require_once( ABSPATH . 'wp-admin/includes/class-wp-upgrader.php' );
-		}
-		$updater = new WP_Automatic_Updater();
-		$is_version_controlled = strval( $updater->is_vcs_checkout( $context = ABSPATH ) );
-		// transients should not be empty
-		if ( empty( $is_version_controlled ) ) {
-			$is_version_controlled = '0';
-		}
-		return $is_version_controlled;
+		_deprecated_function( 'Jetpack::is_version_controlled', '4.1', 'Jetpack_Sync_Functions::is_version_controlled' );
+		return (string) (int) Jetpack_Sync_Functions::is_version_controlled();
 	}
 
 	/**
