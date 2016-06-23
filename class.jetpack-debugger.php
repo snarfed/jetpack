@@ -4,20 +4,66 @@ require_once( dirname( __FILE__ ) . '/sync/class.jetpack-sync-reindex.php' );
 
 class Jetpack_Debugger {
 
-	private static function is_jetpack_support_open() {
+	private $support_status = null;
+
+	private static function jetpack_support_status() { // update is_jetpack_support_open elsewhere
+		$self->support_status = (object) array(
+			'is_support_open' => false,
+			'reason'          => 'http_error',
+		);
 		try {
 			$url = add_query_arg( 'ver', JETPACK__VERSION, 'https://jetpack.com/is-support-open' );
 			$response = wp_remote_request( esc_url_raw( $url ) );
 			if ( is_wp_error( $response ) ) {
-				return false;
+				return;
 			}
 			$body = wp_remote_retrieve_body( $response );
 			$json = json_decode( $body );
-			return ( ( bool ) $json->is_support_open );
+			$self->support_status = $json;
+			return;
 		}
 		catch ( Exception $e ) {
-			return true;
+			return;
 		}
+	}
+
+	private static function is_jetpack_support_open(){
+		if ( ! $self->support_status ){
+			$self->jetpack_support_status();
+		}
+		return ( ( bool ) $self->support_status->is_support_open );
+	}
+
+	private static function jetpack_support_reason_code(){
+		if ( ! $self->support_status ){
+			$self->jetpack_support_status();
+		}
+		return $self->support_status->reason;
+	}
+
+	private static function jetpack_support_reason_human(){
+		$code = self::jetpack_support_reason_code();
+		switch ( $code ) {
+			case 'open':
+				$reason = __( 'Jetpack Support is open.', 'jetpack' );
+				break;
+			case 'meetup' :
+				$reason = __( 'Jetpack Support is closed for a team retreat. We are working hard to make Jetpack better for you!', 'jetpack' );
+				break;
+			case 'holday' :
+				$reason = __( 'Jetpack Support is closed for the holidays. Thank you for your understanding as we spend this time with family and friends.', 'jetpack' );
+				break;
+			case 'http_error' :
+				$reason = __( 'Your site was not able to contact Jetpack Support. Please reach out to us via our website.', 'jetpack' );
+				break;
+			case 'notsupported' :
+				$reason = __( 'Your version of Jetpack is no longer supported by our team. Please update now!', 'jetpack' );
+				break;
+			case 'none' :
+			default :
+				break;
+		}
+		return $reason;
 	}
 
 	public static function jetpack_increase_timeout() {
@@ -199,6 +245,8 @@ class Jetpack_Debugger {
 				<?php if ( self::is_jetpack_support_open() ): ?>
 				<p class="jetpack-show-contact-form"><?php echo sprintf( __( 'If none of these help you find a solution, <a href="%s">click here to contact Jetpack support</a>. Tell us as much as you can about the issue and what steps you\'ve tried to resolve it, and one of our Happiness Engineers will be in touch to help.', 'jetpack' ), Jetpack::admin_url( array( 'page' => 'jetpack-debugger', 'contact' => true ) ) ); ?>
 				</p>
+				<?php elseif( self::jetpack_support_reason_code() ): ?>
+					<p><b><?php echo self::jetpack_support_reason_human(); ?></b></p>
 				<?php endif; ?>
 				<?php if ( Jetpack::is_active() ) : ?>
 					<hr />
