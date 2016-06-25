@@ -1,5 +1,5 @@
 <?php
-require_once dirname( __FILE__ ) . '/class.jetpack-sync-deflate-codec.php';
+require_once dirname( __FILE__ ) . '/class.jetpack-sync-json-deflate-codec.php';
 require_once dirname( __FILE__ ) . '/class.jetpack-sync-queue.php';
 require_once dirname( __FILE__ ) . '/class.jetpack-sync-functions.php';
 require_once dirname( __FILE__ ) . '/class.jetpack-sync-full.php';
@@ -83,6 +83,7 @@ class Jetpack_Sync_Client {
 		add_action( 'deleted_comment', $handler, 10 );
 		add_action( 'trashed_comment', $handler, 10 );
 		add_action( 'spammed_comment', $handler, 10 );
+
 		add_filter( 'jetpack_sync_before_send_wp_insert_comment', array( $this, 'expand_wp_insert_comment' ) );
 
 		// even though it's messy, we implement these hooks because
@@ -92,7 +93,7 @@ class Jetpack_Sync_Client {
 			foreach ( array( 'unapproved', 'approved' ) as $comment_status ) {
 				$comment_action_name = "comment_{$comment_status}_{$comment_type}";
 				add_action( $comment_action_name, $handler, 10, 2 );
-				add_filter( "jetpack_sync_before_send_{$comment_action_name}", array( $this, 'expand_wp_comment_status_change' ) );
+				add_filter( 'jetpack_sync_before_send_' . $comment_action_name, array( $this, 'expand_wp_insert_comment' ) );
 			}
 		}
 
@@ -140,18 +141,24 @@ class Jetpack_Sync_Client {
 		add_action( 'set_user_role', array( $this, 'save_user_role_handler' ), 10, 3 );
 		add_action( 'remove_user_role', array( $this, 'save_user_role_handler' ), 10, 2 );
 
-
 		// user capabilities
 		add_action( 'added_user_meta', array( $this, 'save_user_cap_handler' ), 10, 4 );
 		add_action( 'updated_user_meta', array( $this, 'save_user_cap_handler' ), 10, 4 );
 		add_action( 'deleted_user_meta', array( $this, 'save_user_cap_handler' ), 10, 4 );
 
-		// themes
+		// updates
 		add_action( 'set_site_transient_update_plugins', $handler, 10, 1 );
 		add_action( 'set_site_transient_update_themes', $handler, 10, 1 );
 		add_action( 'set_site_transient_update_core', $handler, 10, 1 );
-
 		add_filter( 'jetpack_sync_before_enqueue_set_site_transient_update_plugins', array( $this, 'filter_update_keys' ), 10, 2 );
+
+		// plugins
+		add_action( 'upgrader_process_complete', $handler, 10, 2 );
+		add_filter( 'jetpack_sync_before_send_upgrader_process_complete', array( $this, 'expand_upgrader_process_complete' ) );
+		add_action( 'deleted_plugin', $handler, 10, 2 );
+		add_action( 'activated_plugin', $handler, 10, 2 );
+		add_action( 'deactivated_plugin', $handler, 10, 2 );
+
 
 		// multi site network options
 		if ( $this->is_multisite ) {
@@ -297,7 +304,6 @@ class Jetpack_Sync_Client {
 		
 		$current_filter = current_filter();
 		$args           = func_get_args();
-
 		if ( in_array( $current_filter, array( 'deleted_option', 'added_option', 'updated_option' ) )
 		     &&
 		     ! $this->is_whitelisted_option( $args[0] )
@@ -310,6 +316,10 @@ class Jetpack_Sync_Client {
 		     ! $this->is_whitelisted_network_option( $args[0] )
 		) {
 			return;
+		}
+		
+		if ( $current_filter == 'upgrader_process_complete' ) {
+			array_shift( $args );
 		}
 
 		// don't sync private meta
@@ -548,11 +558,9 @@ class Jetpack_Sync_Client {
 		 *
 		 * @param array $data The action buffer
 		 */
-		$result = apply_filters( 'jetpack_sync_client_send_data', $items_to_send );
+		$result = apply_filters( 'jetpack_sync_client_send_data', $items_to_send, $this->codec->name() );
 
 		if ( ! $result || is_wp_error( $result ) ) {
-			// error_log("There was an error sending data:");
-			// error_log(print_r($result, 1));
 			$result = $this->sync_queue->checkin( $buffer );
 
 			if ( is_wp_error( $result ) ) {
@@ -593,8 +601,40 @@ class Jetpack_Sync_Client {
 		return array( $args[0], $this->filter_post_content_and_add_links( $args[1] ), $args[2] );
 	}
 
+	function expand_upgrader_process_complete( $args ) {
+		list( $process ) = $args;
+		if ( isset( $process['type'] ) && $process['type'] === 'plugin' ) {
+			return array( $process, get_plugins() );
+		}
+		return $args;
+	}
+
 	// Expands wp_insert_post to include filtered content
 	function filter_post_content_and_add_links( $post ) {
+
+		/**
+		 * Filters whether to prevent sending post data to .com
+		 *
+		 * Passing true to the filter will prevent the post data from being sent
+		 * to the WordPress.com.
+		 * Instead we pass data that will still enable us to do a checksum against the
+		 * Jetpacks data but will prevent us from displaying the data on in the API as well as
+		 * other services.
+		 * @since 4.2.0
+		 *
+		 * @param boolean false prevent post data from bing sycned to WordPress.com
+		 * @param mixed $post WP_POST object
+		 */
+		if ( apply_filters( 'jetpack_sync_prevent_sending_post_data', false, $post ) ) {
+			// We only send the bare necessery object to be able to create a checksum.
+			$blocked_post = new stdClass();
+			$blocked_post->ID = $post->ID;
+			$blocked_post->post_modified = $post->post_modified;
+			$blocked_post->post_modified_gmt = $post->post_modified_gmt;
+			$blocked_post->post_status = 'jetpack_sync_blocked';
+			return $blocked_post;
+		}
+
 		if ( 0 < strlen( $post->post_password ) ) {
 			$post->post_password = 'auto-' . wp_generate_password( 10, false );
 		}
@@ -603,35 +643,41 @@ class Jetpack_Sync_Client {
 		$post->post_excerpt_filtered   = apply_filters( 'the_content', $post->post_excerpt );
 		$post->permalink               = get_permalink( $post->ID );
 		$post->shortlink               = wp_get_shortlink( $post->ID );
-		
-		// legacy fields until we fully sync users
-		$extra = array();
-		$extra['author_email']            = get_the_author_meta( 'email', $post->post_author );
-		$extra['author_display_name']     = get_the_author_meta( 'display_name', $post->post_author );
-		$extra['dont_email_post_to_subs'] = get_post_meta( $post->ID, '_jetpack_dont_email_post_to_subs', true );
-		$post->extra = $extra;
+		$post->dont_email_post_to_subs = get_post_meta( $post->ID, '_jetpack_dont_email_post_to_subs', true );
 
 		return $post;
 	}
 
+
 	function expand_wp_comment_status_change( $args ) {
-		return array( $args[0], $this->filter_comment_and_add_hc_meta( $args[1] ) );
+		return array( $args[0], $this->filter_comment( $args[1] ) );
 	}
 
 	function expand_wp_insert_comment( $args ) {
-		return array( $args[0], $this->filter_comment_and_add_hc_meta( $args[1] ) );
+		return array( $args[0], $this->filter_comment( $args[1] ) );
 	}
 
-	function filter_comment_and_add_hc_meta( $comment ) {
-		// add meta-property with Highlander Comment meta, which we 
-		// we need to process synchronously on .com
-		$hc_post_as = get_comment_meta( $comment->comment_ID, 'hc_post_as', true );
-		if ( 'wordpress' === $hc_post_as ) {
-			$meta = array();
-			$meta['hc_post_as']         = $hc_post_as;
-			$meta['hc_wpcom_id_sig']    = get_comment_meta( $comment->comment_ID, 'hc_wpcom_id_sig', true );
-			$meta['hc_foreign_user_id'] = get_comment_meta( $comment->comment_ID, 'hc_foreign_user_id', true );
-			$comment->meta = $meta;	
+	function filter_comment( $comment ) {
+		/**
+		 * Filters whether to prevent sending comment data to .com
+		 *
+		 * Passing true to the filter will prevent the comment data from being sent
+		 * to the WordPress.com.
+		 * Instead we pass data that will still enable us to do a checksum against the
+		 * Jetpacks data but will prevent us from displaying the data on in the API as well as
+		 * other services.
+		 * @since 4.2.0
+		 *
+		 * @param boolean false prevent post data from bing sycned to WordPress.com
+		 * @param mixed $comment WP_COMMENT object
+		 */
+		if ( apply_filters( 'jetpack_sync_prevent_sending_comment_data', false, $comment ) ) {
+			$blocked_comment = new stdClass();
+			$blocked_comment->comment_ID = $comment->comment_ID;
+			$blocked_comment->comment_date = $comment->comment_date;
+			$blocked_comment->comment_date_gmt = $comment->comment_date_gmt;
+			$blocked_comment->comment_approved = 'jetpack_sync_blocked';
+			return $blocked_comment;
 		}
 
 		return $comment;
@@ -901,7 +947,7 @@ class Jetpack_Sync_Client {
 		$this->set_sync_wait_time( $settings['sync_wait_time'] );
 
 		$this->set_full_sync_client( Jetpack_Sync_Full::getInstance() );
-		$this->codec                     = new Jetpack_Sync_Deflate_Codec();
+		$this->codec                     = new Jetpack_Sync_JSON_Deflate_Codec();
 		$this->constants_whitelist       = Jetpack_Sync_Defaults::$default_constants_whitelist;
 		$this->update_options_whitelist();
 		$this->network_options_whitelist = Jetpack_Sync_Defaults::$default_network_options_whitelist;
@@ -920,11 +966,31 @@ class Jetpack_Sync_Client {
 	function reset_data() {
 		$this->reset_sync_queue();
 
-		// Lets delete all the other fun stuff like transient and option.
+
 		delete_option( self::CONSTANTS_CHECKSUM_OPTION_NAME );
 		delete_option( self::CALLABLES_CHECKSUM_OPTION_NAME );
 
 		delete_transient( self::CALLABLES_AWAIT_TRANSIENT_NAME );
 		delete_transient( self::CONSTANTS_AWAIT_TRANSIENT_NAME );
+
+		delete_option( self::SYNC_THROTTLE_OPTION_NAME );
+		delete_option( self::LAST_SYNC_TIME_OPTION_NAME );
+
+		$valid_settings  = self::$valid_settings;
+		$settings_prefix =  self::SETTINGS_OPTION_PREFIX;
+		foreach ( $valid_settings as $option => $value ) {
+			delete_option( $settings_prefix . $option );
+		}
+	}
+
+	function uninstall() {
+		// Lets delete all the other fun stuff like transient and option and the sync queue
+		$this->reset_data();
+
+		// delete the full sync status
+		delete_option( 'jetpack_full_sync_status' );
+
+		// clear the sync cron.
+		wp_clear_scheduled_hook( 'jetpack_sync_actions' );
 	}
 }
