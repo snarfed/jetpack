@@ -162,15 +162,47 @@ class Jetpack_Sync {
 	}
 
 	/**
+	 * Check if Jetpack Sync should load.
+	 *
+	 * @since 4.1.0
+	 *
+	 * @return bool true Should Jetpack Sync load? Default to true.
+	 */
+	function should_jetpack_load_sync() {
+		$should_sync_load = true;
+
+		if (
+			! $_SERVER['REQUEST_METHOD'] === 'POST'
+			|| ! current_user_can( 'manage_options' )
+			|| ! is_admin()
+			|| ! defined( 'PHPUNIT_JETPACK_TESTSUITE' )
+			|| Jetpack::is_development_mode()
+			|| Jetpack::is_staging_site()
+		) {
+			$should_sync_load = false;
+		}
+
+		/**
+		 * Fires on every request before default loading sync code.
+		 * Return false to not load sync code and hook sync actions.
+		 *
+		 * @since 4.1.0
+		 *
+		 * @param bool $should_sync_load Should Jetpack Sync load?
+		 */
+		return apply_filters( 'jetpack_sync_should_load', $should_sync_load );
+
+	}
+
+	/**
 	 * Set up all the data and queue it for the outgoing XML-RPC request
 	 */
 	function sync() {
-		if ( !$this->sync ) {
+		if ( ! $this->sync ) {
 			return false;
 		}
 
-		// Don't sync anything from a staging site.
-		if ( Jetpack::is_development_mode() || Jetpack::is_staging_site() ) {
+		if ( ! $this->should_jetpack_load_sync() ) {
 			return false;
 		}
 
