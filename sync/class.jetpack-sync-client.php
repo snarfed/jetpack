@@ -107,9 +107,7 @@ class Jetpack_Sync_Client {
 		add_action( 'update_option_site_icon', array( $this, 'jetpack_sync_core_icon' ) );
 		add_action( 'delete_option_site_icon', array( $this, 'jetpack_sync_core_icon' ) );
 
-		// wordpress version
-		add_action( 'upgrader_process_complete', array( $this, 'send_wp_version' ), 10, 2 );
-		add_action( 'jetpack_sync_wp_version', $handler );
+
 
 		// themes
 		add_action( 'switch_theme', array( $this, 'send_theme_info' ) );
@@ -133,8 +131,12 @@ class Jetpack_Sync_Client {
 		// users
 		add_action( 'user_register', array( $this, 'save_user_handler' ) );
 		add_action( 'profile_update', array( $this, 'save_user_handler' ), 10, 2 );
+		add_action( 'add_user_to_blog', array( $this, 'save_user_handler' ) );
 		add_action( 'jetpack_sync_save_user', $handler, 10, 2 );
+
 		add_action( 'deleted_user', $handler, 10, 2 );
+		add_filter( 'jetpack_sync_before_send_jetpack_sync_save_user', array( $this, 'expand_user' ), 10, 2 );
+		add_action( 'remove_user_from_blog', $handler, 10, 2 );
 
 		// user roles
 		add_action( 'add_user_role', array( $this, 'save_user_role_handler' ), 10, 2 );
@@ -152,9 +154,10 @@ class Jetpack_Sync_Client {
 		add_action( 'set_site_transient_update_core', $handler, 10, 1 );
 		add_filter( 'jetpack_sync_before_enqueue_set_site_transient_update_plugins', array( $this, 'filter_update_keys' ), 10, 2 );
 
-		// plugins
-		add_action( 'upgrader_process_complete', $handler, 10, 2 );
-		add_filter( 'jetpack_sync_before_send_upgrader_process_complete', array( $this, 'expand_upgrader_process_complete' ) );
+		// get_plugins and wp_version
+		// gets fired when new code gets installed, updates etc.
+		add_action( 'upgrader_process_complete', array( $this, 'force_sync_callables' ) );
+
 		add_action( 'deleted_plugin', $handler, 10, 2 );
 		add_action( 'activated_plugin', $handler, 10, 2 );
 		add_action( 'deactivated_plugin', $handler, 10, 2 );
@@ -186,6 +189,9 @@ class Jetpack_Sync_Client {
 		// Module Activation
 		add_action( 'jetpack_activate_module', $handler );
 		add_action( 'jetpack_deactivate_module', $handler );
+
+		// Send periodic checksum
+		add_action( 'jetpack_sync_checksum', $handler );
 
 		/**
 		 * Sync all pending actions with server
@@ -283,6 +289,10 @@ class Jetpack_Sync_Client {
 		$this->codec = $codec;
 	}
 
+	function get_codec() {
+		return $this->codec;
+	}
+
 	function set_full_sync_client( $full_sync_client ) {
 		if ( $this->full_sync_client ) {
 			remove_action( 'jetpack_sync_full', array( $this->full_sync_client, 'start' ) );
@@ -301,7 +311,6 @@ class Jetpack_Sync_Client {
 	}
 
 	function action_handler() {
-		
 		$current_filter = current_filter();
 		$args           = func_get_args();
 		if ( in_array( $current_filter, array( 'deleted_option', 'added_option', 'updated_option' ) )
@@ -417,6 +426,12 @@ class Jetpack_Sync_Client {
 	}
 
 	function save_user_handler( $user_id, $old_user_data = null ) {
+
+		// ensure we only sync users who are members of the current blog
+		if ( ! is_user_member_of_blog( $user_id, get_current_blog_id() ) ) {
+			return;
+		}
+
 		$user = $this->sanitize_user( get_user_by( 'id', $user_id ) );
 
 		// Older versions of WP don't pass the old_user_data in ->data
@@ -432,7 +447,6 @@ class Jetpack_Sync_Client {
 				return;
 			}
 		}
-
 		/**
 		 * Fires when the client needs to sync an updated user
 		 *
@@ -457,6 +471,16 @@ class Jetpack_Sync_Client {
 	}
 
 	function save_user_cap_handler( $meta_id, $user_id, $meta_key, $capabilities ) {
+
+		// if a user is currently being removed as a member of this blog, we don't fire the event
+		if ( current_filter() === 'deleted_user_meta' 
+		&&
+			preg_match( '/capabilities|user_level/', $meta_key )
+		&& 
+			! is_user_member_of_blog( $user_id, get_current_blog_id() ) ) {
+			return;
+		}
+
 		$user = $this->sanitize_user( get_user_by( 'id', $user_id ) );
 		if ( $meta_key === $user->cap_key ) {
 			/**
@@ -472,10 +496,23 @@ class Jetpack_Sync_Client {
 
 	public function sanitize_user( $user ) {
 		unset( $user->data->user_pass );
-
 		return $user;
 	}
 
+	public function sanitize_user_and_expand( $user ) {
+		$user = $this->sanitize_user( $user );
+		return $this->add_to_user( $user );
+	}
+
+	public function add_to_user( $user ) {
+		$user->allowed_mime_types = get_allowed_mime_types( $user );
+		return $user;
+	}
+
+	public function expand_user( $args ) {
+		list( $user ) = $args;
+		return array( $this->add_to_user( $user ) );
+	}
 
 	function do_sync() {
 		// don't sync if importing
@@ -601,14 +638,6 @@ class Jetpack_Sync_Client {
 		return array( $args[0], $this->filter_post_content_and_add_links( $args[1] ), $args[2] );
 	}
 
-	function expand_upgrader_process_complete( $args ) {
-		list( $process ) = $args;
-		if ( isset( $process['type'] ) && $process['type'] === 'plugin' ) {
-			return array( $process, get_plugins() );
-		}
-		return $args;
-	}
-
 	// Expands wp_insert_post to include filtered content
 	function filter_post_content_and_add_links( $post ) {
 
@@ -685,6 +714,12 @@ class Jetpack_Sync_Client {
 
 	private function schedule_sync( $when ) {
 		wp_schedule_single_event( strtotime( $when ), 'jetpack_sync_actions' );
+	}
+
+	function send_checksum() {
+		require_once 'class.jetpack-sync-wp-replicastore.php';
+		$store = new Jetpack_Sync_WP_Replicastore();
+		do_action( 'jetpack_sync_checksum', $store->checksum_all() );
 	}
 
 	function force_sync_constants() {
@@ -992,5 +1027,8 @@ class Jetpack_Sync_Client {
 
 		// clear the sync cron.
 		wp_clear_scheduled_hook( 'jetpack_sync_actions' );
+
+		// clear the checksum cron
+		wp_clear_scheduled_hook( 'jetpack_send_db_checksum' );
 	}
 }
