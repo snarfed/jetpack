@@ -1513,6 +1513,7 @@ class Jetpack {
 		if ( ! function_exists( 'get_plugins' ) ) {
 			require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 		}
+		/** This filter is documented in wp-admin/includes/class-wp-plugins-list-table.php */
 		$all_plugins    = apply_filters( 'all_plugins', get_plugins() );
 		$active_plugins = Jetpack::get_active_plugins();
 
@@ -2814,6 +2815,9 @@ p {
 		}
 
 		Jetpack_Options::update_option( 'unique_connection', $jetpack_unique_connection );
+		
+		// Delete all the sync related data. Since it could be taking up space.
+		Jetpack_Sync_Client::getInstance()->uninstall();
 
 		// Disable the Heartbeat cron
 		Jetpack_Heartbeat::init()->deactivate();
