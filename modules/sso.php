@@ -36,29 +36,6 @@ class Jetpack_SSO {
 
 		// Adding this action so that on login_init, the action won't be sanitized out of the $action global.
 		add_action( 'login_form_jetpack-sso', '__return_true' );
-
-		if ( Jetpack_SSO_Helpers::should_hide_login_form() ) {
-			/**
-			 * Since the default authenticate filters fire at priority 20 for checking username and password,
-			 * let's fire at priority 30. wp_authenticate_spam_check is fired at priority 99, but since we return a
-			 * WP_Error in disable_default_login_form, then we won't trigger spam processing logic.
-			 */
-			add_filter( 'authenticate', array( $this, 'disable_default_login_form' ), 30 );
-
-			/**
-			 * Filter the display of the disclaimer message appearing when default WordPress login form is disabled.
-			 *
-			 * @module sso
-			 *
-			 * @since 2.8.0
-			 *
-			 * @param bool true Should the disclaimer be displayed. Default to true.
-			 */
-			$display_sso_disclaimer = apply_filters( 'jetpack_sso_display_disclaimer', true );
-			if ( $display_sso_disclaimer ) {
-				add_filter( 'login_message', array( $this, 'msg_login_by_jetpack' ) );
-			}
-		}
 	}
 
 	/**
@@ -368,6 +345,29 @@ class Jetpack_SSO {
 	function login_init() {
 		global $action;
 
+		if ( Jetpack_SSO_Helpers::should_hide_login_form() ) {
+			/**
+			 * Since the default authenticate filters fire at priority 20 for checking username and password,
+			 * let's fire at priority 30. wp_authenticate_spam_check is fired at priority 99, but since we return a
+			 * WP_Error in disable_default_login_form, then we won't trigger spam processing logic.
+			 */
+			add_filter( 'authenticate', array( $this, 'disable_default_login_form' ), 30 );
+
+			/**
+			 * Filter the display of the disclaimer message appearing when default WordPress login form is disabled.
+			 *
+			 * @module sso
+			 *
+			 * @since 2.8.0
+			 *
+			 * @param bool true Should the disclaimer be displayed. Default to true.
+			 */
+			$display_sso_disclaimer = apply_filters( 'jetpack_sso_display_disclaimer', true );
+			if ( $display_sso_disclaimer ) {
+				add_filter( 'login_message', array( $this, 'msg_login_by_jetpack' ) );
+			}
+		}
+
 		/**
 		 * If the user is attempting to logout AND the auto-forward to WordPress.com
 		 * login is set then we need to ensure we do not auto-forward the user and get
@@ -653,7 +653,7 @@ class Jetpack_SSO {
 			JetpackTracking::record_user_event( 'sso_login_failed', array(
 				'error_message' => 'error_msg_enable_two_step'
 			) );
-			
+
 			/** This filter is documented in core/src/wp-includes/pluggable.php */
 			do_action( 'wp_login_failed', $user_data->login );
 			add_filter( 'login_message', array( $this, 'error_msg_enable_two_step' ) );
@@ -1044,7 +1044,6 @@ class Jetpack_SSO {
 	 * Builds the translation ready string that is to be used when the site hides the default login form.
 	 *
 	 * @since 4.1.0
-	 * 
 	 * @return string
 	 */
 	public function get_sso_required_message() {
@@ -1068,7 +1067,7 @@ class Jetpack_SSO {
 	 *
 	 * @since 2.7
 	 * @param string $message
-	 * 
+	 *
 	 * @return string
 	 **/
 	public function msg_login_by_jetpack( $message ) {
