@@ -3,7 +3,6 @@
 require_once dirname( __FILE__ ) . '/class.jetpack-sync-queue.php';
 require_once dirname( __FILE__ ) . '/class.jetpack-sync-defaults.php';
 require_once dirname( __FILE__ ) . '/class.jetpack-sync-json-deflate-codec.php';
-require_once dirname( __FILE__ ) . '/class.jetpack-sync-full.php';
 require_once dirname( __FILE__ ) . '/class.jetpack-sync-modules.php';
 require_once dirname( __FILE__ ) . '/class.jetpack-sync-settings.php';
 
@@ -98,6 +97,7 @@ class Jetpack_Sync_Sender {
 		$upload_size   = 0;
 		$items_to_send = array();
 		$actions_to_send = array();
+		
 		// we estimate the total encoded size as we go by encoding each item individually
 		// this is expensive, but the only way to really know :/
 		foreach ( $buffer->get_items() as $key => $item ) {
@@ -133,7 +133,7 @@ class Jetpack_Sync_Sender {
 		 *
 		 * @param array $data The action buffer
 		 */
-		$result = apply_filters( 'jetpack_sync_send_data', $items_to_send, $this->codec->name() );
+		$result = apply_filters( 'jetpack_sync_send_data', $items_to_send, $this->codec->name(), microtime( true ) );
 
 		if ( ! $result || is_wp_error( $result ) ) {
 			$result = $this->sync_queue->checkin( $buffer );
@@ -225,26 +225,8 @@ class Jetpack_Sync_Sender {
 		return update_option( self::LAST_SYNC_TIME_OPTION_NAME, microtime( true ), true );
 	}
 
-	function get_full_sync_client() {
-		return $this->full_sync_client;
-	}
-
-	function set_full_sync_client( $full_sync_client ) {
-		if ( $this->full_sync_client ) {
-			remove_action( 'jetpack_sync_full', array( $this->full_sync_client, 'start' ) );
-		}
-
-		$this->full_sync_client = $full_sync_client;
-
-		/**
-		 * Sync all objects in the database with the server
-		 */
-		add_action( 'jetpack_sync_full', array( $this->full_sync_client, 'start' ) );
-	}
-
 	function set_defaults() {
 		$this->sync_queue = new Jetpack_Sync_Queue( 'sync' );
-		$this->set_full_sync_client( Jetpack_Sync_Full::getInstance() );
 		$this->codec = new Jetpack_Sync_JSON_Deflate_Codec();
 
 		// saved settings

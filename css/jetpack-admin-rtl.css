@@ -70,28 +70,6 @@
   }
 }
 
-body,
-button,
-input,
-select,
-textarea {
-  color: #222;
-  font-family: "Open Sans", Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.4;
-  -webkit-font-smoothing: antialiased;
-}
-
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  color: #222;
-  clear: both;
-}
-
 a {
   color: #0d72b2;
   -webkit-transition: color .2s;
@@ -126,7 +104,7 @@ ins {
 }
 
 dt {
-  font-weight: 700;
+  font-weight: bold;
 }
 
 fieldset {
@@ -197,7 +175,9 @@ hr {
   position: relative;
   padding: 0.76923em 1.46154em;
   color: #efefef;
-  font: 800 0.9285714286em/1 'Open Sans', Helvetica, sans-serif;
+  font-weight: bold;
+  font-size: 0.9285714286em;
+  line-height: 1;
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
   background: #6f7476;
   border-radius: 3px;
@@ -242,7 +222,7 @@ hr {
   position: relative;
   padding: 0.64286em 1.08696em 0.53571em;
   color: #fff;
-  font: 400 20px/1 "proxima-nova", 'Open Sans', Helvetica, sans-serif;
+  font: 400 20px/1 "proxima-nova", Helvetica, sans-serif;
   background: #518d2a;
   z-index: 3;
   border-radius: 6px;
@@ -586,7 +566,7 @@ hr {
   text-align: right;
   margin-top: 0;
   color: #5d6d74;
-  font: 300 32px "proxima-nova", "Open Sans", Helvetica, Arial, sans-serif;
+  font: 300 32px "proxima-nova", Helvetica, Arial, sans-serif;
   text-shadow: 0 1px 1px #fff;
 }
 
@@ -858,7 +838,7 @@ hr {
   padding: 0 6px;
   color: #bbb;
   font-size: 0.78571em;
-  font-family: "Gill Sans", "Gill Sans MT", "Open Sans", Helvetica, Arial, sans-serif;
+  font-family: "Gill Sans", "Gill Sans MT", Helvetica, Arial, sans-serif;
   text-transform: uppercase;
 }
 
@@ -1994,7 +1974,7 @@ So I moved to stack the svgs as actual imgs instead. IE also had a hard time dea
 }
 
 .jp-content h1 {
-  font: 400 1.75em "proxima-nova","Open Sans",Helvetica,Arial,sans-serif;
+  font: 400 1.75em "proxima-nova",Helvetica,Arial,sans-serif;
   position: relative;
   z-index: 3;
   width: 100%;
