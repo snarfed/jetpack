@@ -168,10 +168,23 @@ class Jetpack_Sync_Defaults {
 		'network_upload_file_types'           => array( 'Jetpack', 'network_upload_file_types' ),
 		'network_enable_administration_menus' => array( 'Jetpack', 'network_enable_administration_menus' ),
 	);
+	
 
 	static $default_whitelist_meta_keys = array(
 		'_wp_attachment_metadata',
 		'_thumbnail_id',
+		'_wpas_mess',
+		'_wpas_skip_',
+		'_g_feedback_shortcode',
+		'_feedback_extra_fields',
+		'_feedback_akismet_values',
+		'_publicize_facebook_user',
+		'_wp_attachment_image_alt',
+		'_jetpack_post_thumbnail',
+		'_thumbnail_id',
+		'_wp_attachment_metadata',
+		'_wp_page_template',
+		'_publicize_twitter_user'
 	);
 
 	// TODO: move this to server? - these are theme support values
@@ -202,7 +215,7 @@ class Jetpack_Sync_Defaults {
 				return true;
 			}
 		}
-
+		
 		return false;
 	}
 
@@ -213,6 +226,7 @@ class Jetpack_Sync_Defaults {
 	static $default_upload_max_rows = 500;
 	static $default_sync_wait_time = 10; // seconds, between syncs
 	static $default_max_queue_size = 1000;
+	static $default_max_queue_lag = 900; // 15 minutes
 	static $default_sync_callables_wait_time = MINUTE_IN_SECONDS; // seconds before sending callables again
 	static $default_sync_constants_wait_time = HOUR_IN_SECONDS; // seconds before sending constants again
 }

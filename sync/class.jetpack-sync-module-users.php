@@ -2,7 +2,7 @@
 
 class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
 	function name() {
-		return "users";
+		return 'users';
 	}
 
 	public function init_listeners( $callable ) {
@@ -36,7 +36,11 @@ class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
 
 	public function init_before_send() {
 		add_filter( 'jetpack_sync_before_send_jetpack_sync_save_user', array( $this, 'expand_user' ) );
+		add_filter( 'jetpack_sync_before_send_wp_login', array( $this, 'expand_login_username' ), 10, 2 );
 		add_filter( 'jetpack_sync_before_send_wp_logout', array( $this, 'expand_logout_username' ), 10, 2 );
+
+		// full sync
+		add_filter( 'jetpack_sync_before_send_jetpack_full_sync_users', array( $this, 'expand_users' ) );
 	}
 
 	public function sanitize_user_and_expand( $user ) {
@@ -59,10 +63,17 @@ class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
 		return array( $this->add_to_user( $user ) );
 	}
 
+	public function expand_login_username( $args ) {
+		list( $login, $user ) = $args;
+		$user = $this->sanitize_user( $user );
+		return array( $login ,$user );
+	}
+
 	public function expand_logout_username( $args, $user_id ) {
-		$username = get_userdata( $user_id )->user_login;
-		$args[] = $username;
-		return $args;
+		$user = get_userdata( $user_id );
+		$user = $this->sanitize_user( $user );
+		$login = $user->data->user_login;
+		return array( $login, $user );
 	}
 
 	function save_user_handler( $user_id, $old_user_data = null ) {
@@ -132,5 +143,19 @@ class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
 			 */
 			do_action( 'jetpack_sync_save_user', $user );
 		}
+	}
+
+	public function enqueue_full_sync_actions() {
+		global $wpdb;
+		return $this->enqueue_all_ids_as_action( 'jetpack_full_sync_users', $wpdb->users, 'ID', null );
+	}
+
+	function get_full_sync_actions() {
+		return array( 'jetpack_full_sync_users' );
+	}
+
+	public function expand_users( $args ) {
+		$user_ids = $args[0];
+		return array_map( array( $this, 'sanitize_user_and_expand' ), get_users( array( 'include' => $user_ids ) ) );
 	}
 }
