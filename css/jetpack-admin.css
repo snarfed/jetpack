@@ -1112,10 +1112,6 @@ hr {
   display: inline-block;
 }
 
-.table-bordered.jetpack-modules tr.jetpack-module:hover td .row-actions span a {
-  opacity: 1;
-}
-
 .table-bordered.jetpack-modules tr.jetpack-module.active th,
 .table-bordered.jetpack-modules tr.jetpack-module.active td {
   background: #f7fcfe;
@@ -1130,16 +1126,8 @@ hr {
   border-left: 4px solid #2ea2cc;
 }
 
-.table-bordered.jetpack-modules tr.jetpack-module.unavailable {
-  opacity: 0.3;
-}
-
 .table-bordered.jetpack-modules tr.jetpack-module.unavailable input {
   display: none;
-}
-
-.table-bordered.jetpack-modules tr.jetpack-module#vaultpress {
-  opacity: 1;
 }
 
 .table-bordered.jetpack-modules tr.jetpack-module.deprecated span {
@@ -1177,14 +1165,6 @@ hr {
   margin-left: 5px;
 }
 
-.table-bordered.jetpack-modules tr.jetpack-module td .row-actions span a {
-  opacity: 0;
-}
-
-.table-bordered.jetpack-modules tr.jetpack-module td .row-actions span a:focus {
-  opacity: 1;
-}
-
 @media (max-width: 530px) {
   .table-bordered.jetpack-modules tr.jetpack-module td .row-actions {
     display: none;
@@ -1197,6 +1177,26 @@ hr {
     padding-left: 10px;
     visibility: visible;
   }
+}
+
+.table-bordered.jetpack-modules.with-transparency tr.jetpack-module:hover td .row-actions span a {
+  opacity: 1;
+}
+
+.table-bordered.jetpack-modules.with-transparency tr.jetpack-module.unavailable {
+  opacity: 0.3;
+}
+
+.table-bordered.jetpack-modules.with-transparency tr.jetpack-module#vaultpress {
+  opacity: 1;
+}
+
+.table-bordered.jetpack-modules.with-transparency tr.jetpack-module td .row-actions span a {
+  opacity: 0;
+}
+
+.table-bordered.jetpack-modules.with-transparency tr.jetpack-module td .row-actions span a:focus {
+  opacity: 1;
 }
 
 .table-bordered.jetpack-modules > thead > tr > th {
