@@ -82,7 +82,7 @@ class Jetpack_Carousel {
 		 *
 		 * @since 1.6.0
 		 *
-		 * @param bool false Should Carousel be disabled? Default to fase.
+		 * @param bool false Should Carousel be disabled? Default to false.
 		 */
 		return apply_filters( 'jp_carousel_maybe_disable', false );
 	}
@@ -208,6 +208,24 @@ class Jetpack_Carousel {
 							. '<fieldset><label for="url">' . __( 'Website', 'jetpack' ) . '</label> '
 							. '<input type="text" name="url" class="jp-carousel-comment-form-field jp-carousel-comment-form-text-field" id="jp-carousel-comment-form-url-field" /></fieldset>';
 						}
+				}
+			}
+
+			/**
+			 * Handle WP stats for images in full-screen.
+			 * Build string with tracking info.
+			 */
+			if ( in_array( 'stats', Jetpack::get_active_modules() ) && ! Jetpack::is_development_mode() ) {
+				$localize_strings['stats'] = 'blog=' . Jetpack_Options::get_option( 'id' ) . '&host=' . parse_url( get_option( 'home' ), PHP_URL_HOST ) . '&v=ext&j=' . JETPACK__API_VERSION . ':' . JETPACK__VERSION;
+
+				// Set the stats as empty if user is logged in but logged-in users shouldn't be tracked.
+				if ( is_user_logged_in() && function_exists( 'stats_get_options' ) ) {
+					$stats_options = stats_get_options();
+					$track_loggedin_users = isset( $stats_options['reg_users'] ) ? (bool) $stats_options['reg_users'] : false;
+
+					if ( ! $track_loggedin_users ) {
+						$localize_strings['stats'] = '';
+					}
 				}
 			}
 
