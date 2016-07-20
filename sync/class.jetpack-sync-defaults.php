@@ -77,7 +77,7 @@ class Jetpack_Sync_Defaults {
 		'disabled_reblogs',
 		'jetpack_comment_likes_enabled',
 		'twitter_via',
-		'twitter-cards-site-tag',
+		'jetpack-twitter-cards-site-tag',
 		'wpcom_publish_posts_with_markdown',
 		'wpcom_publish_comments_with_markdown',
 		'jetpack_activated',
@@ -153,6 +153,21 @@ class Jetpack_Sync_Defaults {
 
 	static $blacklisted_post_types = array(
 		'ai1ec_event' // https://irc.automattic.com/chanlog.php?channel=jetpack&day=2014-05-29&sort=asc#m71850
+	);
+
+	static $default_post_checksum_columns = array(
+		'ID',
+		'post_modified',
+	); 
+
+	static $default_comment_checksum_columns = array(
+		'comment_ID',
+		'comment_content',
+	); 
+
+	static $default_option_checksum_columns = array(
+		'option_name',
+		'option_value',
 	);
 
 	// returns escapted SQL that can be injected into a WHERE clause

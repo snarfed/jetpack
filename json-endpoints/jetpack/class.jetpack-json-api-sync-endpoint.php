@@ -30,7 +30,6 @@ class Jetpack_JSON_API_Sync_Endpoint extends Jetpack_JSON_API_Endpoint {
 		}
 
 		Jetpack_Sync_Actions::schedule_full_sync( $modules );
-		spawn_cron();
 
 		return array( 'scheduled' => true );
 	}
@@ -119,11 +118,17 @@ class Jetpack_JSON_API_Sync_Histogram_Endpoint extends Jetpack_JSON_API_Endpoint
 
 		$args = $this->query_args();
 
+		if ( isset( $args['columns'] ) ) {
+			$columns = array_map('trim', explode( ',', $args['columns'] ) );
+		} else {
+			$columns = null; // go with defaults
+		}
+
 		require_once dirname(__FILE__) . '/../../sync/class.jetpack-sync-wp-replicastore.php';
 
 		$store = new Jetpack_Sync_WP_Replicastore();
 
-		$result = $store->checksum_histogram( $args['object_type'], $args['buckets'], $args['start_id'], $args['end_id'] );
+		$result = $store->checksum_histogram( $args['object_type'], $args['buckets'], $args['start_id'], $args['end_id'], $columns );
 
 		$sync_queue->unlock();
 
