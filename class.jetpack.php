@@ -3092,29 +3092,31 @@ p {
 				$post_id = 0;
 			}
 
-			$media_array = $_FILES['media'];
-			error_log( "\n _REQUEST\n" . json_encode( $_REQUEST ) );
-			error_log( "\n _GET\n" . json_encode( $_GET ) );
-			error_log( "\n _POST\n" . json_encode( $_POST ) );
-
-			error_log( "\n media_array\n" . json_encode( $media_array ) );
-
-			$file_array['name'] = $media_array['name'][0]; 
-			$file_array['type'] = $media_array['type'][0]; 
-			$file_array['tmp_name'] = $media_array['tmp_name'][0]; 
-			$file_array['error'] = $media_array['error'][0]; 
-			$file_array['size'] = $media_array['size'][0]; 
-
-			error_log( "\n file_array\n" . json_encode( $file_array ) );
-
-			$media_id = $_POST[ 'post_id' ][0];
-			error_log( "\n media_id: " . $media_id . "\n\n" );
-
-			$path = get_attached_file( $media_id );
-
-			error_log( "\n path: " . $path . "\n\n" );
+			error_log( "\n do_not_create_new_record: " . $do_not_create_new_record . "\n\n" );
 
 			if ( $do_not_create_new_record ) {
+				$media_array = $_FILES['media'];
+				error_log( "\n _REQUEST\n" . json_encode( $_REQUEST ) );
+				error_log( "\n _GET\n" . json_encode( $_GET ) );
+				error_log( "\n _POST\n" . json_encode( $_POST ) );
+
+				error_log( "\n media_array\n" . json_encode( $media_array ) );
+
+				$file_array['name'] = $media_array['name'][0]; 
+				$file_array['type'] = $media_array['type'][0]; 
+				$file_array['tmp_name'] = $media_array['tmp_name'][0]; 
+				$file_array['error'] = $media_array['error'][0]; 
+				$file_array['size'] = $media_array['size'][0]; 
+
+				error_log( "\n file_array\n" . json_encode( $file_array ) );
+
+				$media_id = $_POST[ 'post_id' ][0];
+				error_log( "\n media_id: " . $media_id . "\n\n" );
+
+				$path = get_attached_file( $media_id );
+
+				error_log( "\n path: " . $path . "\n\n" );
+
 				// override filename
 				$filename = $this->generate_new_filename( $media_id );
 				$file_array['name'] = $filename;
