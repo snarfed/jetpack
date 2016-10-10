@@ -462,7 +462,7 @@ class Jetpack {
 
 			// Now that no one can authenticate, and we're whitelisting all XML-RPC methods, force enable_xmlrpc on.
 			add_filter( 'pre_option_enable_xmlrpc', '__return_true' );
-		} elseif ( is_admin() && isset( $_POST['action'] ) && 'jetpack_upload_file' == $_POST['action'] ) {
+		} elseif ( is_admin() && isset( $_POST['action'] ) && ( 'jetpack_upload_file' == $_POST['action'] || 'jetpack_update_file' == $_POST['action'] ) ) {
 			$this->require_jetpack_authentication();
 			$this->add_remote_request_handlers();
 		} else {
@@ -2970,12 +2970,20 @@ p {
 
 	function add_remote_request_handlers() {
 		add_action( 'wp_ajax_nopriv_jetpack_upload_file', array( $this, 'remote_request_handlers' ) );
+		add_action( 'wp_ajax_nopriv_jetpack_update_file', array( $this, 'remote_request_handlers' ) );
 	}
 
 	function remote_request_handlers() {
+		$action = current_filter();
+		error_log( "\n acton: $action\n\n" ); 
+
 		switch ( current_filter() ) {
 		case 'wp_ajax_nopriv_jetpack_upload_file' :
 			$response = $this->upload_handler();
+			break;
+
+		case 'wp_ajax_nopriv_jetpack_update_file' :
+			$response = $this->upload_handler( true );
 			break;
 		default :
 			$response = new Jetpack_Error( 'unknown_handler', 'Unknown Handler', 400 );
@@ -3007,7 +3015,26 @@ p {
 		die( json_encode( (object) $response ) );
 	}
 
-	function upload_handler() {
+	private function generate_new_filename( $media_id ) {
+		$path = get_attached_file( $media_id );
+		$path_parts = pathinfo( $path );
+		$filename = $path_parts['filename'];
+		$suffix = time() . rand( 100, 999 );
+
+		do {
+			$filename = preg_replace( '/-e([0-9]+)$/', '', $filename );
+			$filename .= "-e{$suffix}";
+			$new_filename = "{$filename}.{$path_parts['extension']}";
+			$new_path = "{$path_parts['dirname']}/$new_filename";
+			$suffix++;
+		} while( file_exists( $new_path ) );
+
+		return $new_filename;
+	}
+
+	function upload_handler( $do_not_create_new_record  = true) {
+		error_log( 'do not create a new record: ' . $do_not_create_new_record );
+
 		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
 			return new Jetpack_Error( 405, get_status_header_desc( 405 ), 405 );
 		}
@@ -3026,6 +3053,8 @@ p {
 		if ( empty( $_FILES ) ) {
 			return new Jetpack_Error( 'no_files_uploaded', 'No files were uploaded: nothing to process', 400 );
 		}
+
+		error_log( "\n\n _FILES\n" . json_encode( $_FILES ) );
 
 		foreach ( array_keys( $_FILES ) as $files_key ) {
 			if ( ! isset( $_POST["_jetpack_file_hmac_{$files_key}"] ) ) {
@@ -3062,6 +3091,61 @@ p {
 			if ( ! current_user_can( 'edit_post', $post_id ) ) {
 				$post_id = 0;
 			}
+
+			$media_array = $_FILES['media'];
+			error_log( "\n _REQUEST\n" . json_encode( $_REQUEST ) );
+			error_log( "\n _GET\n" . json_encode( $_GET ) );
+			error_log( "\n _POST\n" . json_encode( $_POST ) );
+
+			error_log( "\n media_array\n" . json_encode( $media_array ) );
+
+			$file_array['name'] = $media_array['name'][0]; 
+			$file_array['type'] = $media_array['type'][0]; 
+			$file_array['tmp_name'] = $media_array['tmp_name'][0]; 
+			$file_array['error'] = $media_array['error'][0]; 
+			$file_array['size'] = $media_array['size'][0]; 
+
+			error_log( "\n file_array\n" . json_encode( $file_array ) );
+
+			$media_id = $_POST[ 'post_id' ][0];
+			error_log( "\n media_id: " . $media_id . "\n\n" );
+
+			$path = get_attached_file( $media_id );
+
+			error_log( "\n path: " . $path . "\n\n" );
+
+			if ( $do_not_create_new_record ) {
+				// override filename
+				$filename = $this->generate_new_filename( $media_id );
+				$file_array['name'] = $filename;
+
+				// ... finally save the file locally with wp_handle_sideload()
+				$overrides = array( 'test_form' => false );
+
+				// create a `YYYY/MM` date string according to the post_date of the current media post.
+				$time = current_time( 'mysql' );
+				if ( $media = get_post( $media_id ) ) {
+					if ( substr( $media->post_date, 0, 4 ) > 0 ) {
+						$time = $media->post_date;
+					}
+				}
+
+				error_log( "\n file_array\n" . json_encode( $file_array ) );
+
+				$file = wp_handle_upload ( $file_array, $overrides, $time );
+				error_log( "\n file\n" . json_encode( $file ) . "\n\n" );
+
+				$path_parts = pathinfo( $file['file'] );
+				error_log( "\n file\n" . json_encode( $path_parts ) . "\n\n" );
+
+				return array(
+					'URL'       => (string) $file['url'],
+					'name'      => (string) $path_parts['basename'],
+					'type'      => (string) $file['type'],
+				);
+			}
+
+
 			$attachment_id = media_handle_upload(
 				'.jetpack.upload.',
 				$post_id,

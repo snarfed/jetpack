@@ -185,6 +185,8 @@ class WPCOM_JSON_API_Update_Media_v1_2_Endpoint extends WPCOM_JSON_API_Update_Me
 
 		$input = $this->input( true );
 
+		error_log( json_encode( $input ) );
+
 		// images
 		$media_file = $input['media'] ? (array) $input['media'] : null;
 		$media_url = $input['media_url'];
