@@ -3032,7 +3032,7 @@ p {
 		return $new_filename;
 	}
 
-	function upload_handler( $do_not_create_new_record  = true) {
+	function upload_handler( $do_not_create_new_record = false ) {
 		error_log( 'do not create a new record: ' . $do_not_create_new_record );
 
 		if ( 'POST' !== strtoupper( $_SERVER['REQUEST_METHOD'] ) ) {
