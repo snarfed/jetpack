@@ -31,6 +31,7 @@ class Jetpack_XMLRPC_Server {
 				'jetpack.disconnectBlog'    => array( $this, 'disconnect_blog' ),
 				'jetpack.unlinkUser'        => array( $this, 'unlink_user' ),
 				'jetpack.syncObject'        => array( $this, 'sync_object' ),
+				'jetpack.idcClearStaging'   => array( $this, 'clear_staging_site_option' ),
 			) );
 
 			if ( isset( $core_methods['metaWeblog.editPost'] ) ) {
@@ -366,6 +367,8 @@ class Jetpack_XMLRPC_Server {
 		return $modules;
 	}
 
+
+
 	/**
 	 * Returns what features are enabled. Uses the slug of the modules files.
 	 *
@@ -484,5 +487,14 @@ class Jetpack_XMLRPC_Server {
 			(string) $nonce,
 			(string) $hmac,
 		);
+	}
+
+	/*
+	 * This clears the option flag that is used when a site is automatically put into IDC.
+	 *
+	 * @return boolean
+	 */
+	function clear_staging_site_option() {
+		return Jetpack_Options::delete_option( 'sync_error_idc' );
 	}
 }
