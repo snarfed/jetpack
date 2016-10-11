@@ -5230,6 +5230,32 @@ p {
 		return apply_filters( 'jetpack_has_identity_crisis', $errors, $force_recheck );
 	}
 
+	/*
+	 * Normalizes a url by doing three things:
+	 *  - Strips protocol
+	 *  - Strips www
+	 *  - Adds a trailing slash
+	 *
+	 * @since 4.4.0
+	 * @param string $url
+	 * @return string the normalized URL
+	 */
+	public static function normalize_url_protocol_agnostic( $url ) {
+		$url = esc_url_raw( $url );
+		$url_parsed = wp_parse_url( trailingslashit( $url ) );
+
+		if ( ! $url_parsed ) {
+			return new WP_Error( 'couldnt_parse_url', 'The url could not be parsed.' );
+		}
+
+		$url_normalized = $url_parsed['host'] . $url_parsed['path'];
+
+		// Strip off any `www.` prefix
+		$url_normalized = preg_replace( '/^www\./i', '', $url_normalized );
+
+		return $url_normalized;
+	}
+
 	/**
 	 * Checks whether a value is already whitelisted.
 	 *
