@@ -5174,9 +5174,11 @@ p {
 			$errors        = array();
 
 			foreach ( $cloud_options as $cloud_key => $cloud_value ) {
+				$cloud_value_normalized = self::normalize_url_protocol_agnostic( $cloud_value );
+				$local_value_normalized = self::normalize_url_protocol_agnostic( get_option( $cloud_key ) );
 
 				// If it's not the same as the local value...
-				if ( $cloud_value !== get_option( $cloud_key ) ) {
+				if ( $cloud_value_normalized !== $local_value_normalized ) {
 
 					// Break out if we're getting errors.  We are going to check the error keys later when we alert.
 					if ( 'error_code' == $cloud_key ) {
