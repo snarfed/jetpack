@@ -435,6 +435,32 @@ EXPECTED;
 		add_filter( 'jetpack_sync_idc_optin', array( $this, '__return_string_1' ) );
 	}
 
+	function test_normalize_url_protocol_agnostic_strips_protocol_and_www() {
+		$url = 'https://www.subdomain.myfaketestsite.com/what';
+		$url_normalized = Jetpack::normalize_url_protocol_agnostic( $url );
+		$this->assertTrue( 'subdomain.myfaketestsite.com/what/' === $url_normalized );
+
+		$url = 'http://subdomain.myfaketestsite.com';
+		$url_normalized = Jetpack::normalize_url_protocol_agnostic( $url );
+		$this->assertTrue( 'subdomain.myfaketestsite.com/' === $url_normalized );
+
+		$url = 'www.subdomain.myfaketestsite.com/';
+		$url_normalized = Jetpack::normalize_url_protocol_agnostic( $url );
+		$this->assertTrue( 'subdomain.myfaketestsite.com/' === $url_normalized );
+
+		$url = 'subdomain.myfaketestsite.com';
+		$url_normalized = Jetpack::normalize_url_protocol_agnostic( $url );
+		$this->assertTrue( 'subdomain.myfaketestsite.com/' === $url_normalized );
+
+		$url = '123.456.789.0';
+		$url_normalized = Jetpack::normalize_url_protocol_agnostic( $url );
+		$this->assertTrue( '123.456.789.0/' === $url_normalized );
+
+		$url = 'http://123.456.789.0';
+		$url_normalized = Jetpack::normalize_url_protocol_agnostic( $url );
+		$this->assertTrue( '123.456.789.0/' === $url_normalized );
+	}
+
 	function __return_string_1() {
 		return '1';
 	}
