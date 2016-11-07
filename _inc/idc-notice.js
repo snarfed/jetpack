@@ -11,12 +11,13 @@
 		confirmSafeModeButton = $( '#jp-idc-confirm-safe-mode-action' ),
 		fixConnectionButton = $( '#jp-idc-fix-connection-action' ),
 		reconnectButton  = $( '#jp-idc-reconnect-site-action' ),
-		migrateButton = $( '#jp-idc-migrate-action' );
+		migrateButton = $( '#jp-idc-migrate-action'),
+		viewEvent = idcL10n.isAdmin ? 'notice_view' : 'non_admin_notice_view';
 
 
 	// Initialize Tracks and bump stats.
 	analytics.initialize( tracksUser.userid, tracksUser.username );
-	trackAndBumpMCStats( 'notice_view' );
+	trackAndBumpMCStats( viewEvent );
 	clearConfirmationArgsFromUrl();
 
 	// Confirm Safe Mode
