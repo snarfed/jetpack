@@ -308,7 +308,11 @@ frontendjs = [
 	'modules/shortcodes/js/recipes.js',
 	'modules/shortcodes/js/recipes-printthis.js',
 	'modules/shortcodes/js/slideshow-shortcode.js',
-	'modules/wpgroho.js'
+	'modules/wpgroho.js',
+	'_inc/spin.js',
+	'_inc/jquery.spin.js',
+	'_inc/twitter-timeline.js',
+	'_inc/facebook-embed.js'
 ];
 
 gulp.task( 'old-styles:watch', function() {

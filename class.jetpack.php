@@ -747,11 +747,11 @@ class Jetpack {
 	 */
 	public function register_assets() {
 		if ( ! wp_script_is( 'spin', 'registered' ) ) {
-			wp_register_script( 'spin', plugins_url( '_inc/spin.js', JETPACK__PLUGIN_FILE ), false, '1.3' );
+			wp_register_script( 'spin', plugins_url( 'js/spin.min.js', JETPACK__PLUGIN_FILE ), false, '1.3' );
 		}
 
 		if ( ! wp_script_is( 'jquery.spin', 'registered' ) ) {
-			wp_register_script( 'jquery.spin', plugins_url( '_inc/jquery.spin.js', JETPACK__PLUGIN_FILE ) , array( 'jquery', 'spin' ), '1.3' );
+			wp_register_script( 'jquery.spin', plugins_url( 'js/jquery.spin.min.js', JETPACK__PLUGIN_FILE ) , array( 'jquery', 'spin' ), '1.3' );
 		}
 
 		if ( ! wp_script_is( 'jetpack-gallery-settings', 'registered' ) ) {
@@ -759,11 +759,11 @@ class Jetpack {
 		}
 
 		if ( ! wp_script_is( 'jetpack-twitter-timeline', 'registered' ) ) {
-			wp_register_script( 'jetpack-twitter-timeline', plugins_url( '_inc/twitter-timeline.js', JETPACK__PLUGIN_FILE ) , array( 'jquery' ), '4.0.0', true );
+			wp_register_script( 'jetpack-twitter-timeline', plugins_url( 'js/twitter-timeline.min.js', JETPACK__PLUGIN_FILE ) , array( 'jquery' ), '4.0.0', true );
 		}
 
 		if ( ! wp_script_is( 'jetpack-facebook-embed', 'registered' ) ) {
-			wp_register_script( 'jetpack-facebook-embed', plugins_url( '_inc/facebook-embed.js', __FILE__ ), array( 'jquery' ), null, true );
+			wp_register_script( 'jetpack-facebook-embed', plugins_url( 'js/facebook-embed.min.js', __FILE__ ), array( 'jquery' ), null, true );
 
 			/** This filter is documented in modules/sharedaddy/sharing-sources.php */
 			$fb_app_id = apply_filters( 'jetpack_sharing_facebook_app_id', '249643311490' );
