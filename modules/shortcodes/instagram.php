@@ -145,9 +145,13 @@ function jetpack_instagram_handler( $matches, $atts, $url ) {
 	}
 
 	if ( ! empty( $response_body->html ) ) {
+		$file_path = ! is_admin() && ! ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG )
+			? 'js/instagram.min.js'
+			: 'modules/shortcodes/js/instagram.js';
+
 		wp_enqueue_script(
 			'jetpack-instagram-embed',
-			plugins_url( 'js/instagram.min.js', JETPACK__PLUGIN_FILE ),
+			plugins_url( $file_path, JETPACK__PLUGIN_FILE ),
 			array( 'jquery' ),
 			false,
 			true

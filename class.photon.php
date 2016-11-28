@@ -940,9 +940,13 @@ class Jetpack_Photon {
 	 * @return null
 	 */
 	public function action_wp_enqueue_scripts() {
+		$file_path = ! is_admin() && ! ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG )
+			? 'js/photon.min.js'
+			: 'modules/photon/photon.js';
+
 		wp_enqueue_script(
 			'jetpack-photon',
-			plugins_url( 'js/photon.min.js', JETPACK__PLUGIN_FILE ),
+			plugins_url( $file_path, JETPACK__PLUGIN_FILE ),
 			array( 'jquery' ),
 			20130122,
 			true

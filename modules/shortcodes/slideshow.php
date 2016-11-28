@@ -268,16 +268,31 @@ class Jetpack_Slideshow_Shortcode {
 	 * Actually enqueues the scripts and styles.
 	 */
 	function enqueue_scripts() {
+		static $enqueued = false;
+
+		if ( $enqueued ) {
+			return;
+		}
+
+		$file_path = ! is_admin() && ! ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG )
+			? '/js/jquery.cycle.min.js'
+			: 'modules/shortcodes/js/jquery.cycle.js';
+
 		wp_enqueue_script(
 			'jquery-cycle',
-			plugins_url( '/js/jquery.cycle.min.js', JETPACK__PLUGIN_FILE ),
+			plugins_url( $file_path, JETPACK__PLUGIN_FILE ),
 			array( 'jquery' ),
 			'20161231',
 			true
 		);
+
+		$file_path = ! is_admin() && ! ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG )
+			? '/js/slideshow-shortcode.min.js'
+			: 'modules/shortcodes/js/slideshow-shortcode.js';
+
 		wp_enqueue_script(
 			'jetpack-slideshow',
-			plugins_url( '/js/slideshow-shortcode.min.js', JETPACK__PLUGIN_FILE ),
+			plugins_url( $file_path, JETPACK__PLUGIN_FILE ),
 			array( 'jquery-cycle' ),
 			'20121214.1',
 			true

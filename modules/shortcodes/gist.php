@@ -54,9 +54,13 @@ function github_gist_shortcode( $atts, $content = '' ) {
 		return '<!-- Invalid Gist ID -->';
 	}
 
+	$file_path = ! is_admin() && ! ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG )
+		? 'js/gist.js'
+		: 'modules/shortcodes/js/gist.js';
+
 	wp_enqueue_script(
 		'jetpack-gist-embed',
-		plugins_url( 'js/gist.js', JETPACK__PLUGIN_FILE ),
+		plugins_url( $file_path, JETPACK__PLUGIN_FILE ),
 		array( 'jquery' ),
 		false,
 		true

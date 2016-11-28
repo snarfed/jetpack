@@ -766,8 +766,13 @@ function sharing_display( $text = '', $echo = false ) {
 			} else {
 				$ver = '20141212';
 			}
+
+			$file_path = ! is_admin() && ! ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG )
+				? 'js/sharing.min.js'
+				: 'modules/sharedaddy/sharing.js';
+
 			wp_register_script( 'sharing-js',
-				plugins_url( 'js/sharing.min.js', JETPACK__PLUGIN_FILE ),
+				plugins_url( $file_path, JETPACK__PLUGIN_FILE ),
 				array( 'jquery' ),
 				$ver
 			);

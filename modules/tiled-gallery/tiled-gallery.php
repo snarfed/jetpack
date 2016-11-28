@@ -89,9 +89,13 @@ class Jetpack_Tiled_Gallery {
 	}
 
 	public static function default_scripts_and_styles() {
+		$file_path = ! is_admin() && ! ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG )
+			? 'js/tiled-gallery.min.js'
+			: 'modules/tiled-gallery/tiled-gallery/tiled-gallery.js';
+
 		wp_enqueue_script(
 			'tiled-gallery',
-			plugins_url( 'js/tiled-gallery.min.js', JETPACK__PLUGIN_FILE ),
+			plugins_url( $file_path, JETPACK__PLUGIN_FILE ),
 			array( 'jquery' )
 		);
 		if( is_rtl() ) {
