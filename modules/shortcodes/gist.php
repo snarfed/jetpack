@@ -55,7 +55,7 @@ function github_gist_shortcode( $atts, $content = '' ) {
 	}
 
 	$file_path = ! is_admin() && ! ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG )
-		? 'js/gist.js'
+		? 'js/gist.min.js'
 		: 'modules/shortcodes/js/gist.js';
 
 	wp_enqueue_script(
