@@ -476,6 +476,30 @@ class WP_Test_Jetpack_Sync_Functions extends WP_Test_Jetpack_Sync_Base {
 
 		$this->assertContains( 'jetpack_site_icon', $this->server_replica_storage->get_callable( 'site_icon_url' ) );
 	}
+
+	function test_get_raw_url_by_option_bypasses_filters() {
+		add_filter( 'option_home', array( $this, '__return_filtered_url' ) );
+		$this->assertTrue( 'http://filteredurl.com' !== Jetpack_Sync_Functions::get_raw_url( 'home' ) );
+		remove_filter( 'option_home', array( $this, '__return_filtered_url' ) );
+	}
+
+	function test_get_raw_url_by_constant_bypasses_filters() {
+		Jetpack_Constants::set_constant( 'WP_HOME', 'http://constanturl.com' );
+		Jetpack_Constants::set_constant( 'WP_SITEURL', 'http://constanturl.com' );
+		add_filter( 'option_home', array( $this, '__return_filtered_url' ) );
+		add_filter( 'option_siteurl', array( $this, '__return_filtered_url' ) );
+
+		$this->assertEquals( 'http://constanturl.com', Jetpack_Sync_Functions::get_raw_url( 'home' ) );
+		$this->assertEquals( 'http://constanturl.com', Jetpack_Sync_Functions::get_raw_url( 'siteurl' ) );
+
+		remove_filter( 'option_home', array( $this, '__return_filtered_url' ) );
+		remove_filter( 'option_siteurl', array( $this, '__return_filtered_url' ) );
+		Jetpack_Constants::clear_constants();
+	}
+
+	function __return_filtered_url() {
+		return 'http://filteredurl.com';
+	}
 	
 	function add_www_subdomain_to_siteurl( $url ) {
 		$parsed_url = parse_url( $url );
