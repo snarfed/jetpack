@@ -53,8 +53,8 @@ if [[ $ADD_BETA_VERSION -eq 1 ]]; then
     echo "Now at version $CURRENT_VERSION!"
 fi
 
-npm install
-npm run build-production
+yarn
+yarn build-production
 
 echo "Purging paths included in .svnignore, .gitignore and .git itself"
 # check .git
