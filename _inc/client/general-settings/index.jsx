@@ -37,6 +37,10 @@ export const GeneralSettings = ( props ) => {
 		isAdmin = props.userCanManageModules,
 		moduleList = Object.keys( props.moduleList );
 
+	if ( ! props.active ) {
+		return <span />;
+	}
+
 	const moduleCard = ( module_slug ) => {
 		var unavailableInDevMode = props.isUnavailableInDevMode( module_slug ),
 			customClasses = unavailableInDevMode ? 'devmode-disabled' : '',

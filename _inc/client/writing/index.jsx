@@ -20,6 +20,10 @@ export const Writing = React.createClass( {
 	displayName: 'WritingSettings',
 
 	render() {
+		if ( '/writing' !== this.props.route.path ) {
+			return <span />;
+		}
+
 		return (
 			<div>
 				<QuerySite />

@@ -15,6 +15,7 @@ import { translate as __ } from 'i18n-calypso';
 import Masthead from 'components/masthead';
 import Navigation from 'components/navigation';
 import NavigationSettings from 'components/navigation-settings';
+import SearchableSettings from 'settings/index.jsx';
 import JetpackConnect from 'components/jetpack-connect';
 import JumpStart from 'components/jumpstart';
 import { getJumpStartStatus, isJumpstarting } from 'state/jumpstart';
@@ -177,40 +178,16 @@ const Main = React.createClass( {
 				pageComponent = <Plans siteRawUrl={ this.props.siteRawUrl } siteAdminUrl={ this.props.siteAdminUrl } />;
 				break;
 			case '/settings':
-				navComponent = <NavigationSettings route={ this.props.route } />;
-				pageComponent = <GeneralSettings route={ this.props.route } />;
-				break;
 			case '/general':
-				navComponent = <NavigationSettings route={ this.props.route } />;
-				pageComponent = <GeneralSettings route={ this.props.route } />;
-				break;
 			case '/engagement':
-				navComponent = <NavigationSettings route={ this.props.route } />;
-				pageComponent = <Engagement route={ this.props.route } />;
-				break;
-			case '/discussion':
-				navComponent = <NavigationSettings route={ this.props.route } />;
-				pageComponent = <Discussion route={ this.props.route } siteRawUrl={ this.props.siteRawUrl } />;
-				break;
 			case '/security':
-				navComponent = <NavigationSettings route={ this.props.route } />;
-				pageComponent = <Security route={ this.props.route } siteAdminUrl={ this.props.siteAdminUrl } />;
-				break;
 			case '/traffic':
-				navComponent = <NavigationSettings route={ this.props.route } />;
-				pageComponent = <Traffic route={ this.props.route } siteRawUrl={ this.props.siteRawUrl } siteAdminUrl={ this.props.siteAdminUrl } />;
-				break;
+			case '/discussion':
 			case '/appearance':
-				navComponent = <NavigationSettings route={ this.props.route } />;
-				pageComponent = <Appearance route={ this.props.route } />;
-				break;
 			case '/writing':
-				navComponent = <NavigationSettings route={ this.props.route } />;
-				pageComponent = <Writing route={ this.props.route } siteAdminUrl={ this.props.siteAdminUrl } />;
-				break;
 			case '/search':
 				navComponent = <NavigationSettings route={ this.props.route } />;
-				pageComponent = <SearchPage siteAdminUrl={ this.props.siteAdminUrl } />;
+				pageComponent = <SearchableSettings route={ this.props.route } siteAdminUrl={ this.props.siteAdminUrl } />;
 				break;
 
 			default:
