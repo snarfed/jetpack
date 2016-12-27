@@ -20,7 +20,7 @@ export const Writing = React.createClass( {
 	displayName: 'WritingSettings',
 
 	render() {
-		if ( '/writing' !== this.props.route.path ) {
+		if ( ! this.props.searchTerm && ! this.props.active ) {
 			return <span />;
 		}
 
@@ -30,6 +30,7 @@ export const Writing = React.createClass( {
 				<Composing
 					settings={ this.props.settings }
 					getModule={ this.props.module }
+					searchTerm={ this.props.searchTerm }
 				/>
 				<Media
 					settings={ this.props.settings }
