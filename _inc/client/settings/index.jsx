@@ -2,7 +2,6 @@
  * External dependencies
  */
 import React from 'react';
-import { connect } from 'react-redux';
 
 /**
  * Internal dependencies
@@ -13,44 +12,42 @@ import Appearance from 'appearance/index.jsx';
 import GeneralSettings from 'general-settings/index.jsx';
 import Writing from 'writing/index.jsx';
 
-export const SearchableSettings = React.createClass( {
+export default React.createClass( {
 	displayName: 'SearchableSettings',
 
 	render() {
+		var commonProps = {
+			route: this.props.route,
+			searchTerm: this.props.searchTerm
+		};
+
 		return (
 			<div>
 				<GeneralSettings
-					route={ this.props.route }
 					active={ ( '/general' === this.props.route.path ) }
+					{ ...commonProps }
 				/>
 				<Engagement
-					route={ this.props.route }
 					active={ ( '/engagement' === this.props.route.path ) }
+					{ ...commonProps }
 				/>
 				<Security
-					route={ this.props.route }
 					siteAdminUrl={ this.props.siteAdminUrl }
 					active={ ( '/security' === this.props.route.path ) }
-				/>
+					{ ...commonProps }
+/>
 				<Appearance
 					route={ this.props.route }
 					active={ ( '/appearance' === this.props.route.path ) }
+					{ ...commonProps }
 				/>
 				<Writing
-					route={ this.props.route }
 					siteAdminUrl={ this.props.siteAdminUrl }
 					active={ ( '/writing' === this.props.route.path ) }
+					{ ...commonProps }
 				/>
 			</div>
 		);
 	}
 } );
 
-export default connect(
-	( state ) => {
-		return {}
-	},
-	( dispatch ) => {
-		return {};
-	}
-)( SearchableSettings );

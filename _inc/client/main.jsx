@@ -30,6 +30,7 @@ import {
 } from 'state/initial-state';
 import { areThereUnsavedModuleOptions, clearUnsavedOptionFlag } from 'state/modules';
 import { areThereUnsavedSettings, clearUnsavedSettingsFlag } from 'state/settings';
+import { getSearchTerm } from 'state/search';
 
 import AtAGlance from 'at-a-glance/index.jsx';
 import Engagement from 'engagement/index.jsx';
@@ -112,7 +113,8 @@ const Main = React.createClass( {
 	shouldComponentUpdate: function( nextProps ) {
 		return nextProps.siteConnectionStatus !== this.props.siteConnectionStatus ||
 			nextProps.jumpStartStatus !== this.props.jumpStartStatus ||
-			nextProps.route.path !== this.props.route.path;
+			nextProps.route.path !== this.props.route.path ||
+			nextProps.searchTerm !== this.props.searchTerm;
 	},
 
 	componentWillReceiveProps( nextProps ) {
@@ -187,7 +189,10 @@ const Main = React.createClass( {
 			case '/writing':
 			case '/search':
 				navComponent = <NavigationSettings route={ this.props.route } />;
-				pageComponent = <SearchableSettings route={ this.props.route } siteAdminUrl={ this.props.siteAdminUrl } />;
+				pageComponent = <SearchableSettings
+					route={ this.props.route }
+					siteAdminUrl={ this.props.siteAdminUrl }
+					searchTerm={ this.props.searchTerm } />;
 				break;
 
 			default:
@@ -233,6 +238,7 @@ export default connect(
 			siteConnectionStatus: getSiteConnectionStatus( state ),
 			siteRawUrl: getSiteRawUrl( state ),
 			siteAdminUrl: getSiteAdminUrl( state ),
+			searchTerm: getSearchTerm( state ),
 			apiRoot: getApiRootUrl( state ),
 			apiNonce: getApiNonce( state ),
 			tracksUserData: getTracksUserData( state ),
