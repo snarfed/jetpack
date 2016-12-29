@@ -111,6 +111,17 @@ const Main = React.createClass( {
 	},
 
 	shouldComponentUpdate: function( nextProps ) {
+
+		// A special case when user has just entered search mode and has not yet
+		// entered a search term
+		if (
+			nextProps.route.path !== this.props.route.path
+			&& '/search' === nextProps.route.path
+			&& ! nextProps.searchTerm
+		) {
+			return false;
+		}
+
 		return nextProps.siteConnectionStatus !== this.props.siteConnectionStatus ||
 			nextProps.jumpStartStatus !== this.props.jumpStartStatus ||
 			nextProps.route.path !== this.props.route.path ||
