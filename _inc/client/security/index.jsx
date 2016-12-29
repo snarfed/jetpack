@@ -19,7 +19,7 @@ export const Security = React.createClass( {
 	displayName: 'SecuritySettings',
 
 	render() {
-		if ( '/security' !== props.route.path ) {
+		if ( ! this.props.active ) {
 			return <span />;
 		}
 

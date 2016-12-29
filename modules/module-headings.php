@@ -119,7 +119,7 @@ function jetpack_get_module_i18n( $key ) {
 
 			'protect' => array(
 				'name' => _x( 'Protect', 'Module Name', 'jetpack' ),
-				'description' => _x( 'Prevent and block malicious login attempts.', 'Module Description', 'jetpack' ),
+				'description' => _x( 'Prevent brute force attacks.', 'Module Description', 'jetpack' ),
 			),
 
 			'publicize' => array(

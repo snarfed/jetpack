@@ -20,6 +20,10 @@ export const Traffic = React.createClass( {
 	displayName: 'TrafficSettings',
 
 	render() {
+		if ( ! this.props.active ) {
+			return <span />;
+		}
+
 		return (
 			<div>
 				<QuerySite />

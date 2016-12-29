@@ -192,6 +192,7 @@ const Main = React.createClass( {
 				pageComponent = <SearchableSettings
 					route={ this.props.route }
 					siteAdminUrl={ this.props.siteAdminUrl }
+					siteRawUrl={ this.props.siteRawUrl }
 					searchTerm={ this.props.searchTerm } />;
 				break;
 
