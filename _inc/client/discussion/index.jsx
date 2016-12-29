@@ -39,11 +39,11 @@ export const Discussion = React.createClass( {
 				m.search_terms,
 				m.additional_search_queries,
 				m.short_description,
-				m.feature.toString()
+				m.feature ? m.feature.toString() : ''
 			].toString();
 
 			return text.toLowerCase().indexOf( this.props.searchTerm ) > -1;
-p		}, this);
+		}, this);
 
 		let commentsSettings = (
 			<Comments
