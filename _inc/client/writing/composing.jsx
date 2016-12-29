@@ -151,6 +151,11 @@ export const Composing = moduleSettingsForm(
 				</FormFieldset>
 			);
 
+			// If we don't have any element to show, return early
+			if ( ! list.some( function( element ) { return !! element; } ) ) {
+				return <span />;
+			}
+
 			return (
 				<SettingsCard header={ __( 'Composing', { context: 'Settings header' } ) } { ...this.props }>
 					{ list[0] ? markdownSettings : '' }
