@@ -325,7 +325,13 @@ function jetpack_og_get_image( $width = 200, $height = 200, $max_images = 4 ) { 
 
 			$img_width  = '';
 			$img_height = '';
-			$image_id = attachment_url_to_postid( $image_url );
+			$cached_image_id = get_transient( 'jp_' . $image_url )
+			if ( false !== $cached_image_id ){
+				$image_id = $cached_image_id;
+			}else{
+				$image_id = attachment_url_to_postid( $image_url );
+				set_transient( 'jp_' . $image_url, $image_id );
+			}
 			$image_size = wp_get_attachment_image_src( $image_id, $width >= 512
 				? 'full'
 				: array( $width, $width ) );
@@ -363,7 +369,13 @@ function jetpack_og_get_image( $width = 200, $height = 200, $max_images = 4 ) { 
 
 		$img_width  = '';
 		$img_height = '';
-		$image_id = attachment_url_to_postid( $image_url );
+		$cached_image_id = get_transient( 'jp_' . $image_url )
+		if ( false !== $cached_image_id ){
+			$image_id = $cached_image_id;
+		}else{
+			$image_id = attachment_url_to_postid( $image_url );
+			set_transient( 'jp_' . $image_url, $image_id );
+		}
 		$image_size = wp_get_attachment_image_src( $image_id, $max_side >= 512
 			? 'full'
 			: array( $max_side, $max_side ) );
