@@ -26,7 +26,7 @@ export const Traffic = React.createClass( {
 
 		// Getting text data about modules and seeing if it's being searched for
 		let list = [
-			this.props.module( 'seo' ),
+			this.props.module( 'seo-tools' ),
 			this.props.module( 'stats' ),
 			this.props.module( 'related-posts' ),
 			this.props.module( 'verification-tools' )
