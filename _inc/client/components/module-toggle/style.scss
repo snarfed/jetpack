@@ -6,3 +6,10 @@
 .form-toggle.is-compact.is-toggling:checked + .form-toggle__label .form-toggle__switch:after {
 	left: 0;
 }
+
+.dops-form-toggle {
+	& + .jp-form-fieldset,
+	& + .jp-form-setting-explanation {
+		margin-left: rem( 36px );
+	}
+}
