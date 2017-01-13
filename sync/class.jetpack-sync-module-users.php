@@ -70,7 +70,8 @@ class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
 			unset( $user->data->user_pass );
 		}
 
-		return $user;
+
+			return $user;
 	}
 
 	public function add_to_user( $user ) {
@@ -80,7 +81,7 @@ class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
 			return $user;
 		}
 
-		// Only set the user local if it is different from the site local
+		// Only set the user locale if it is different from the site local
 		if ( get_locale() === get_user_locale( $user->ID ) ) {
 			return $user;
 		}
