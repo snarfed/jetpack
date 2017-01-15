@@ -70,22 +70,20 @@ class Jetpack_Sync_Module_Users extends Jetpack_Sync_Module {
 			unset( $user->data->user_pass );
 		}
 
-
-			return $user;
+		return $user;
 	}
 
 	public function add_to_user( $user ) {
 		$user->allowed_mime_types = get_allowed_mime_types( $user );
 
-		if ( ! function_exists( 'get_user_locale' ) ) {
-			return $user;
-		}
+		if ( function_exists( 'get_user_locale' ) ) {
 
-		// Only set the user locale if it is different from the site local
-		if ( get_locale() === get_user_locale( $user->ID ) ) {
-			return $user;
+			// Only set the user locale if it is different from the site local
+			if ( get_locale() !== get_user_locale( $user->ID ) ) {
+				$user->locale = get_user_locale( $user->ID );
+			}
 		}
-		$user->locale = get_user_locale( $user->ID );
+		
 		return $user;
 	}
 
