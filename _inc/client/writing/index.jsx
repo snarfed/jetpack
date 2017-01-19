@@ -10,11 +10,11 @@ import { connect } from 'react-redux';
 import { getModule } from 'state/modules';
 import { getSettings } from 'state/settings';
 import QuerySite from 'components/data/query-site';
-import { Composing } from './composing';
-import { Media } from './media';
-import { CustomContentTypes } from './custom-content-types';
-import { ThemeEnhancements } from './theme-enhancements';
-import { PostByEmail } from './post-by-email';
+import Composing from './composing';
+import Media from './media';
+import CustomContentTypes from './custom-content-types';
+import ThemeEnhancements from './theme-enhancements';
+import PostByEmail from './post-by-email';
 
 export const Writing = React.createClass( {
 	displayName: 'WritingSettings',
@@ -24,30 +24,19 @@ export const Writing = React.createClass( {
 			return <span />;
 		}
 
+		let commonProps = {
+			settings: this.props.settings,
+			getModule: this.props.module
+		};
+
 		return (
 			<div>
 				<QuerySite />
-				<Composing
-					settings={ this.props.settings }
-					getModule={ this.props.module }
-					searchTerm={ this.props.searchTerm }
-				/>
-				<Media
-					settings={ this.props.settings }
-					getModule={ this.props.module }
-				/>
-				<CustomContentTypes
-					settings={ this.props.settings }
-					getModule={ this.props.module }
-				/>
-				<ThemeEnhancements
-					settings={ this.props.settings }
-					getModule={ this.props.module }
-				/>
-				<PostByEmail
-					settings={ this.props.settings }
-					getModule={ this.props.module }
-				/>
+				<Composing { ...commonProps } />
+				<Media { ...commonProps } />
+				<CustomContentTypes { ...commonProps } />
+				<ThemeEnhancements { ...commonProps } />
+				<PostByEmail { ...commonProps } />
 			</div>
 		);
 	}

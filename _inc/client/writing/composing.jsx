@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
-import React from 'react';
 import analytics from 'lib/analytics';
+import React from 'react';
+import { connect } from 'react-redux';
 import { translate as __ } from 'i18n-calypso';
 
 /**
@@ -14,6 +15,7 @@ import {
 	FormLabel
 } from 'components/forms';
 import { getModule } from 'state/modules';
+import { isModuleFound as _isModuleFound } from 'state/search';
 import { ModuleToggle } from 'components/module-toggle';
 import { ModuleSettingsForm as moduleSettingsForm } from 'components/module-settings/module-settings-form';
 import { ModuleSettingCheckbox } from 'components/module-settings/form-components';
@@ -21,7 +23,7 @@ import TagsInput from 'components/tags-input';
 import SettingsCard from 'components/settings-card';
 import InlineExpand from 'components/inline-expand';
 
-export const Composing = moduleSettingsForm(
+const Composing = moduleSettingsForm(
 	React.createClass( {
 		getCheckbox( setting, label ) {
 			return(
@@ -94,29 +96,17 @@ export const Composing = moduleSettingsForm(
 		},
 
 		render() {
-			let markdown = this.props.getModule( 'markdown' ),
-				atd = this.props.getModule( 'after-the-deadline' );
 
-			// Getting text data about modules and seeing if it's being searched for
-			let list = [ markdown, atd ].map( function( m ) {
-				if ( ! this.props.searchTerm ) {
-					return true;
-				}
+			// If we don't have any element to show, return early
+			if (
+				! this.props.isModuleFound( 'markdown' )
+				&& ! this.props.isModuleFound( 'after-the-deadline' )
+			) {
+				return <span />;
+			}
 
-				let text = [
-					m.module,
-					m.name,
-					m.description,
-					m.learn_more_button,
-					m.long_description,
-					m.search_terms,
-					m.additional_search_queries,
-					m.short_description,
-					m.feature.toString()
-				].toString();
-
-				return text.toLowerCase().indexOf( this.props.searchTerm ) > -1;
-			}, this);
+			let markdown = this.props.module( 'markdown' ),
+				atd = this.props.module( 'after-the-deadline' );
 
 			let markdownSettings = (
 				<FormFieldset support={ markdown.learn_more_button }>
@@ -151,17 +141,21 @@ export const Composing = moduleSettingsForm(
 				</FormFieldset>
 			);
 
-			// If we don't have any element to show, return early
-			if ( ! list.some( function( element ) { return !! element; } ) ) {
-				return <span />;
-			}
-
 			return (
 				<SettingsCard header={ __( 'Composing', { context: 'Settings header' } ) } { ...this.props }>
-					{ list[0] ? markdownSettings : '' }
-					{ list[1] ? atdSettings : '' }
+					{ this.props.isModuleFound( 'markdown' ) && markdownSettings }
+					{ this.props.isModuleFound( 'after-the-deadline' ) && atdSettings }
 				</SettingsCard>
 			);
 		}
 	} )
 );
+
+export default connect(
+	( state ) => {
+		return {
+			module: ( module_name ) => getModule( state, module_name ),
+			isModuleFound: ( module_name ) => _isModuleFound( state, module_name )
+		}
+	}
+)( Composing );

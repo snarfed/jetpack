@@ -3,6 +3,7 @@
  */
 import analytics from 'lib/analytics';
 import React from 'react';
+import { connect } from 'react-redux';
 import { translate as __ } from 'i18n-calypso';
 
 /**
@@ -10,14 +11,23 @@ import { translate as __ } from 'i18n-calypso';
  */
 import { FormFieldset } from 'components/forms';
 import { ModuleToggle } from 'components/module-toggle';
+import { getModule } from 'state/modules';
+import { isModuleFound as _isModuleFound } from 'state/search';
 import { ModuleSettingsForm as moduleSettingsForm } from 'components/module-settings/module-settings-form';
 import { ModuleSettingCheckbox } from 'components/module-settings/form-components';
 import SettingsCard from 'components/settings-card';
 
-export const ThemeEnhancements = moduleSettingsForm(
+const ThemeEnhancements = moduleSettingsForm(
 	React.createClass( {
 
 		render() {
+			if (
+				! this.props.isModuleFound( 'infinite-scroll' )
+				&& ! this.props.isModuleFound( 'minileven' )
+			) {
+				return <span />;
+			}
+
 			return (
 				<SettingsCard
 					{ ...this.props }
@@ -25,7 +35,7 @@ export const ThemeEnhancements = moduleSettingsForm(
 					{
 						[
 							{
-								...this.props.getModule( 'infinite-scroll' ),
+								...this.props.module( 'infinite-scroll' ),
 								checkboxes: [
 									{
 										key: 'infinite_scroll',
@@ -39,7 +49,7 @@ export const ThemeEnhancements = moduleSettingsForm(
 								separator: true
 							},
 							{
-								...this.props.getModule( 'minileven' ),
+								...this.props.module( 'minileven' ),
 								checkboxes: [
 									{
 										key: 'wp_mobile_excerpt',
@@ -56,6 +66,10 @@ export const ThemeEnhancements = moduleSettingsForm(
 								]
 							}
 						].map( item => {
+							if ( ! this.props.isModuleFound( item.module ) ) {
+								return <span />;
+							}
+
 							return (
 								<div key={ `theme_enhancement_${ item.module }` }>
 									<FormFieldset support={ item.learn_more_button }>
@@ -97,3 +111,12 @@ export const ThemeEnhancements = moduleSettingsForm(
 		}
 	} )
 );
+
+export default connect(
+	( state ) => {
+		return {
+			module: ( module_name ) => getModule( state, module_name ),
+			isModuleFound: ( module_name ) => _isModuleFound( state, module_name )
+		}
+	}
+)( ThemeEnhancements );
