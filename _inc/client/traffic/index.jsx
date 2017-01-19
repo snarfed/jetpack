@@ -9,6 +9,7 @@ import { connect } from 'react-redux';
  */
 import { getModule } from 'state/modules';
 import { getSettings } from 'state/settings';
+import { isModuleFound as _isModuleFound } from 'state/search';
 import QuerySite from 'components/data/query-site';
 import { SEO } from './seo';
 import { SiteStats } from './site-stats';
@@ -20,35 +21,25 @@ export const Traffic = React.createClass( {
 	displayName: 'TrafficSettings',
 
 	render() {
-		if ( ! this.props.searchTerm && ! this.props.active ) {
+		let found = {
+			seo: this.props.isModuleFound( 'seo-tools' ),
+			stats: this.props.isModuleFound( 'stats' ),
+			related: this.props.isModuleFound( 'related-posts' ),
+			verification: this.props.isModuleFound( 'verification-tools' ),
+			sitemaps: this.props.isModuleFound( 'sitemaps' )
+		};
+
+		if (
+			! this.props.searchTerm
+			&& ! this.props.active
+			&& ! found.seo
+			&& ! found.stats
+			&& ! found.related
+			&& ! found.verification
+			&& ! found.sitemaps
+		) {
 			return <span />;
 		}
-
-		// Getting text data about modules and seeing if it's being searched for
-		let list = [
-			this.props.module( 'seo-tools' ),
-			this.props.module( 'stats' ),
-			this.props.module( 'related-posts' ),
-			this.props.module( 'verification-tools' )
-		].map( function( m ) {
-			if ( ! this.props.searchTerm ) {
-				return true;
-			}
-
-			let text = [
-				m.module,
-				m.name,
-				m.description,
-				m.learn_more_button,
-				m.long_description,
-				m.search_terms,
-				m.additional_search_queries,
-				m.short_description,
-				m.feature ? m.feature.toString() : ''
-			].toString();
-
-			return text.toLowerCase().indexOf( this.props.searchTerm ) > -1;
-		}, this);
 
 		let seoSettings = (
 			<SEO
@@ -85,10 +76,10 @@ export const Traffic = React.createClass( {
 		return (
 			<div>
 				<QuerySite />
-				{ list[0] ? seoSettings : '' }
-				{ list[1] ? statsSettings : '' }
-				{ list[2] ? relatedPostsSettings : '' }
-				{ list[3] ? verificationSettings : '' }
+				{ found.seo && seoSettings }
+				{ found.stats && statsSettings }
+				{ found.related && relatedPostsSettings }
+				{ ( found.verification || found.sitemaps ) && verificationSettings }
 			</div>
 		);
 	}
@@ -99,6 +90,7 @@ export default connect(
 		return {
 			module: ( module_name ) => getModule( state, module_name ),
 			settings: getSettings( state ),
+			isModuleFound: ( module_name ) => _isModuleFound( state, module_name ),
 			lastPostUrl: getLastPostUrl( state )
 		}
 	}
