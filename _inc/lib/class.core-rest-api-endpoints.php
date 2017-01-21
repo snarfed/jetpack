@@ -679,7 +679,11 @@ class Jetpack_Core_Json_Api_Endpoints {
 	public static function get_site_data() {
 
 		if ( $site_id = Jetpack_Options::get_option( 'id' ) ) {
-			$response = Jetpack_Client::wpcom_json_api_request_as_blog( sprintf( '/sites/%d', $site_id ), '1.1' );
+			$cache = get_transient( 'jetpack_site_api_data' );
+			if( ! empty( $cache ) ) {
+				return $cache;
+			}
+			$response = Jetpack_Client::wpcom_json_api_request_as_blog( sprintf( '/sites/%d', $site_id ) . '?force=wpcom&fields=plan', '1.1' );
 
 			if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 				return new WP_Error( 'site_data_fetch_failed', esc_html__( 'Failed fetching site data. Try again later.', 'jetpack' ), array( 'status' => 400 ) );
@@ -692,12 +696,14 @@ class Jetpack_Core_Json_Api_Endpoints {
 				update_option( 'jetpack_active_plan', $results['plan'] );
 			}
 
-			return rest_ensure_response( array(
+			$cache = rest_ensure_response( array(
 					'code' => 'success',
 					'message' => esc_html__( 'Site data correctly received.', 'jetpack' ),
 					'data' => wp_remote_retrieve_body( $response ),
 				)
 			);
+			set_transient( 'jetpack_site_api_data', $cache, 15 * MINUTE_IN_SECONDS );
+			return $cache;
 		}
 
 		return new WP_Error( 'site_id_missing', esc_html__( 'The ID of this site does not exist.', 'jetpack' ), array( 'status' => 404 ) );
