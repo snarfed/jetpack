@@ -33,13 +33,6 @@ import { areThereUnsavedSettings, clearUnsavedSettingsFlag } from 'state/setting
 import { getSearchTerm } from 'state/search';
 
 import AtAGlance from 'at-a-glance/index.jsx';
-import Engagement from 'engagement/index.jsx';
-import Discussion from 'discussion';
-import Security from 'security/index.jsx';
-import Traffic from 'traffic';
-import Appearance from 'appearance/index.jsx';
-import GeneralSettings from 'general-settings/index.jsx';
-import Writing from 'writing/index.jsx';
 import Apps from 'apps/index.jsx';
 import Plans from 'plans/index.jsx';
 import Footer from 'components/footer';
@@ -47,7 +40,6 @@ import SupportCard from 'components/support-card';
 import NonAdminView from 'components/non-admin-view';
 import JetpackNotices from 'components/jetpack-notices';
 import AdminNotices from 'components/admin-notices';
-import SearchPage from 'search/index.jsx';
 import analytics from 'lib/analytics';
 import restApi from 'rest-api';
 import { getTracksUserData } from 'state/initial-state';
@@ -244,7 +236,7 @@ const Main = React.createClass( {
 
 export default connect(
 	state => {
-		return  {
+		return {
 			jumpStartStatus: getJumpStartStatus( state ),
 			isJumpstarting: isJumpstarting( state ),
 			siteConnectionStatus: getSiteConnectionStatus( state ),
