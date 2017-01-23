@@ -21,12 +21,16 @@ export const Security = React.createClass( {
 	displayName: 'SecuritySettings',
 
 	render() {
-		if (
-			! this.props.searchTerm
-			&& ! this.props.active
-			&& ! this.props.isModuleFound( 'protect' )
-			&& ! this.props.isModuleFound( 'sso' )
-		) {
+		let found = {
+			protect: this.props.isModuleFound( 'protect' ),
+			sso: this.props.isModuleFound( 'sso' )
+		};
+
+		if ( ! this.props.searchTerm && ! this.props.active ) {
+			return <span />;
+		}
+
+		if ( ! found.sso && ! found.protect ) {
 			return <span />;
 		}
 
@@ -57,10 +61,10 @@ export const Security = React.createClass( {
 		return (
 			<div>
 				<QuerySite />
-				{ this.props.isModuleFound( 'vaultpress' ) && backupSettings }
-				{ this.props.isModuleFound( 'akismet' ) && akismetSettings }
-				{ this.props.isModuleFound( 'protect' ) && protectSettings }
-				{ this.props.isModuleFound( 'sso' ) && ssoSettings }
+				{ ( found.protect || found.sso ) && backupSettings }
+				{ ( found.protect || found.sso ) && akismetSettings }
+				{ found.protect && protectSettings }
+				{ found.sso && ssoSettings }
 			</div>
 		);
 	}

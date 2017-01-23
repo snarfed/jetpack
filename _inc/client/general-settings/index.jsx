@@ -24,6 +24,7 @@ import {
 	getModule as _getModule,
 	getModules
 } from 'state/modules';
+import { isModuleFound as _isModuleFound } from 'state/search';
 import { ModuleToggle } from 'components/module-toggle';
 import { userCanManageModules } from 'state/initial-state';
 
@@ -37,7 +38,7 @@ export const GeneralSettings = ( props ) => {
 		isAdmin = props.userCanManageModules,
 		moduleList = Object.keys( props.moduleList );
 
-	if ( ! props.active ) {
+	if ( ! props.searchTerm && ! props.active ) {
 		return <span />;
 	}
 
@@ -45,6 +46,10 @@ export const GeneralSettings = ( props ) => {
 		var unavailableInDevMode = props.isUnavailableInDevMode( module_slug ),
 			customClasses = unavailableInDevMode ? 'devmode-disabled' : '',
 			toggle = '';
+
+		if ( ! props.isModuleFound( module_slug ) ) {
+			return <span />;
+		}
 
 		if ( unavailableInDevMode ) {
 			toggle = () => __( 'Unavailable in Dev Mode' );
@@ -119,6 +124,7 @@ export default connect(
 		return {
 			isModuleActivated: ( module_name ) => _isModuleActivated( state, module_name ),
 			getModule: ( module_name ) => _getModule( state, module_name ),
+			isModuleFound: ( module_name ) => _isModuleFound( state, module_name ),
 			isTogglingModule: ( module_name ) => isActivatingModule( state, module_name ) || isDeactivatingModule( state, module_name ),
 			isUnavailableInDevMode: ( module_name ) => isUnavailableInDevMode( state, module_name ),
 			userCanManageModules: userCanManageModules( state ),

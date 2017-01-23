@@ -29,10 +29,12 @@ export const Traffic = React.createClass( {
 			sitemaps: this.props.isModuleFound( 'sitemaps' )
 		};
 
+		if ( ! this.props.searchTerm && ! this.props.active ) {
+			return <span />;
+		}
+
 		if (
-			! this.props.searchTerm
-			&& ! this.props.active
-			&& ! found.seo
+			! found.seo
 			&& ! found.stats
 			&& ! found.related
 			&& ! found.verification
